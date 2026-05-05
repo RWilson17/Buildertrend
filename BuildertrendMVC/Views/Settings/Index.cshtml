@@ -1,0 +1,31 @@
+@model BuildertrendMVC.Models.SettingsViewModel
+@{
+    ViewData["Title"] = "Configuración";
+}
+<h2>Configuración de la empresa</h2>
+<form asp-action="Index" method="post" class="mb-4">
+    <div class="mb-3">
+        <label asp-for="CompanyName" class="form-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="LogoUrl" class="form-label"></label>
+        <input asp-for="LogoUrl" class="form-control" />
+        <div class="form-text">URL de imagen (PNG/JPG/SVG recomendado)</div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="PrimaryColor" class="form-label"></label>
+        <input asp-for="PrimaryColor" class="form-control" type="color" style="width: 60px; height: 40px; padding: 2px;" />
+        <span class="ms-2">@Model.PrimaryColor</span>
+    </div>
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+<h5>Vista previa:</h5>
+<div class="d-flex align-items-center mb-3">
+    <img src="@Model.LogoUrl" alt="Logo" style="width:48px;height:48px;object-fit:contain;margin-right:16px;" />
+    <span class="fs-4" style="color:@Model.PrimaryColor">@Model.CompanyName</span>
+</div>

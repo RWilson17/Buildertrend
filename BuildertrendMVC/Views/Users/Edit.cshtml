@@ -1,0 +1,27 @@
+@model BuildertrendMVC.Models.UserEditViewModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+<h2>Editar Usuario</h2>
+<form asp-action="Edit" method="post">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" value="@Model.Email" readonly />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Roles</label>
+        @foreach (var role in Model.AllRoles)
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role" id="role_@role" @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                <label class="form-check-label" for="role_@role">@role</label>
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>
+@section Scripts {
+    @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
+}

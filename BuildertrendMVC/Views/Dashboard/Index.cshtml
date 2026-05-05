@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Dashboard Avanzado";
+    var cotizaciones = ViewBag.Cotizaciones as List<BuildertrendMVC.ViewModels.DashboardQuoteViewModel>;
+    var estados = ViewBag.Estados as List<string>;
+    var productos = ViewBag.Productos as List<string>;
+}
+<h1 class="mb-4">Dashboard Avanzado</h1>
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <label class="form-label">Estado</label>
+        <select name="estado" class="form-select">
+            <option value="">Todos</option>
+            @foreach (var e in estados) { <option value="@e">@e</option> }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Producto</label>
+        <select name="producto" class="form-select">
+            <option value="">Todos</option>
+            @foreach (var p in productos) { <option value="@p">@p</option> }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Desde</label>
+        <input type="date" name="desde" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Hasta</label>
+        <input type="date" name="hasta" class="form-control" />
+    </div>
+    <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <canvas id="ventasPorEstado"></canvas>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <canvas id="ventasPorMes"></canvas>
+    </div>
+</div>
+<div class="mb-4">
+    <a href="@ViewBag.ExportUrl" class="btn btn-success">Exportar a Excel</a>
+</div>
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Folio</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (cotizaciones != null)
+        {
+            foreach (var c in cotizaciones)
+            {
+                <tr>
+                    <td>@c.QuoteNumber</td>
+                    <td>@c.Estado</td>
+                    <td>@c.DateCreated.ToString("yyyy-MM-dd")</td>
+                    <td>$@c.Total.ToString("N2")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Datos para gráficos
+        const cotizaciones = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(cotizaciones));
+        // Ventas por estado
+        const estados = [...new Set(cotizaciones.map(c => c.Estado))];
+        const ventasPorEstado = estados.map(e => cotizaciones.filter(c => c.Estado === e).reduce((sum, c) => sum + c.Total, 0));
+        new Chart(document.getElementById('ventasPorEstado'), {
+            type: 'pie',
+            data: {
+                labels: estados,
+                datasets: [{ data: ventasPorEstado, backgroundColor: ['#007bff','#28a745','#ffc107','#dc3545','#6c757d'] }]
+            },
+            options: { plugins: { title: { display: true, text: 'Ventas por Estado' } } }
+        });
+        // Ventas por mes
+        const meses = [...new Set(cotizaciones.map(c => c.DateCreated.substring(0,7)))];
+        const ventasPorMes = meses.map(m => cotizaciones.filter(c => c.DateCreated.startsWith(m)).reduce((sum, c) => sum + c.Total, 0));
+        new Chart(document.getElementById('ventasPorMes'), {
+            type: 'line',
+            data: {
+                labels: meses,
+                datasets: [{ label: 'Ventas', data: ventasPorMes, borderColor: '#28a745', fill: false }]
+            },
+            options: { plugins: { title: { display: true, text: 'Ventas por Mes' } } }
+        });
+    </script>
+}

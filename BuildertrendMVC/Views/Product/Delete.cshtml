@@ -1,0 +1,33 @@
+@model BuildertrendMVC.Models.Product
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+<h2>Eliminar Producto</h2>
+<div class="alert alert-danger">¿Estás seguro de que deseas eliminar este producto?</div>
+<dl class="row">
+    <dt class="col-sm-2">Tipo</dt>
+    <dd class="col-sm-10">@Model.Type</dd>
+    <dt class="col-sm-2">Modelo</dt>
+    <dd class="col-sm-10">@Model.Model</dd>
+    <dt class="col-sm-2">Material</dt>
+    <dd class="col-sm-10">@Model.Material</dd>
+    <dt class="col-sm-2">Color</dt>
+    <dd class="col-sm-10">@Model.Color</dd>
+    <dt class="col-sm-2">Ancho</dt>
+    <dd class="col-sm-10">@Model.Width</dd>
+    <dt class="col-sm-2">Alto</dt>
+    <dd class="col-sm-10">@Model.Height</dd>
+    <dt class="col-sm-2">Cantidad</dt>
+    <dd class="col-sm-10">@Model.Quantity</dd>
+    <dt class="col-sm-2">Costo Unitario</dt>
+    <dd class="col-sm-10">@Model.UnitCost</dd>
+    <dt class="col-sm-2">Costo Total</dt>
+    <dd class="col-sm-10">@Model.TotalCost</dd>
+    <dt class="col-sm-2">Descripción</dt>
+    <dd class="col-sm-10">@Model.Description</dd>
+</dl>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a class="btn btn-secondary" href="/Product">Cancelar</a>
+</form>

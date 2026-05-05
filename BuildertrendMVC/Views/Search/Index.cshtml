@@ -1,0 +1,47 @@
+@model IEnumerable<BuildertrendMVC.ViewModels.GlobalSearchResultViewModel>
+@{
+    ViewData["Title"] = "Buscador Global";
+}
+<h2 class="mb-4"><i class="bi bi-search"></i> Buscador Global</h2>
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Buscar en todo el sistema..." value="@ViewBag.Query" autofocus />
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
+    </div>
+</form>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No se encontraron resultados.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var r in Model)
+        {
+            <div class="list-group-item list-group-item-action mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-secondary me-2">@r.Tipo</span>
+                    <span class="text-muted small">@r.Fecha?.ToString("yyyy-MM-dd HH:mm")</span>
+                </div>
+                <div class="fw-bold">@r.Texto</div>
+                @if (!string.IsNullOrEmpty(r.Folio))
+                {
+                    <div><span class="badge bg-info">Folio: @r.Folio</span></div>
+                }
+                @if (!string.IsNullOrEmpty(r.Estado))
+                {
+                    <div><span class="badge bg-success">Estado: @r.Estado</span></div>
+                }
+                @if (!string.IsNullOrEmpty(r.Extra))
+                {
+                    <div class="text-muted small">@r.Extra</div>
+                }
+                @if (r.Tipo == "Cotización" || r.Tipo == "Partida" || r.Tipo == "Archivo")
+                {
+                    <a class="btn btn-sm btn-outline-primary mt-2" href="/Quote/Details/@r.Id"><i class="bi bi-eye"></i> Ver cotización</a>
+                }
+            </div>
+        }
+    </div>
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

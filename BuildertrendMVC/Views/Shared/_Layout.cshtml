@@ -1,0 +1,143 @@
+﻿@using BuildertrendMVC.Models
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BuildertrendMVC</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BuildertrendMVC.styles.css" asp-append-version="true" />
+    @using BuildertrendMVC.Models
+    @{
+        var companyName = SettingsViewModel.CurrentCompanyName;
+        var logoUrl = SettingsViewModel.CurrentLogoUrl;
+        var primaryColor = SettingsViewModel.CurrentPrimaryColor;
+    }
+    <style>
+        .navbar.bg-primary {
+            background-color: @(primaryColor ?? "#0d6efd") !important;
+        }
+        .navbar .navbar-brand span {
+            color: @(primaryColor ?? "#0d6efd") !important;
+        }
+    </style>
+</head>
+<body class="@(Context.Request.Path.Value.Contains("/Identity/Account/Login") ? "login-bg" : "")">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow mb-4">
+            <div class="container-fluid">
+                @{
+                    var companyName = BuildertrendMVC.Models.SettingsViewModel.CurrentCompanyName;
+                    var logoUrl = BuildertrendMVC.Models.SettingsViewModel.CurrentLogoUrl;
+                    var primaryColor = BuildertrendMVC.Models.SettingsViewModel.CurrentPrimaryColor;
+                }
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="@logoUrl" width="32" height="32" class="d-inline-block align-top me-2" alt="Logo" />
+                    <span>@companyName</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">Productos</a>
+                        </li>
+                           <li class="nav-item">
+                               <a class="nav-link" asp-area="" asp-controller="Client" asp-action="Index">Clientes</a>
+                           </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Quote" asp-action="Index">Cotizaciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Search" asp-action="Index"><i class="bi bi-search"></i> Buscador</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Excel" asp-action="Upload">Importar</a>
+                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Roles" asp-action="Index">Roles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">Usuarios</a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Configuración</a>
+                            }
+                        </li>
+                        <li class="nav-item">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="nav-link" asp-area="" asp-controller="Audit" asp-action="Index">Historial</a>
+                            }
+                        </li>
+                    </ul>
+                </div>
+                <div class="d-flex">
+                        @await Html.PartialAsync("_LoginPartial")
+                        <button id="darkModeToggle" class="btn btn-outline-light ms-2" type="button" title="Modo oscuro/claro">
+                            <i class="bi bi-moon"></i>
+                        </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <div class="container bg-white rounded shadow-sm p-4 mb-4">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-5">
+        <div class="container text-center py-3">
+            <span class="fw-bold">&copy; 2026 - Buildertrend</span>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+        <script>
+            // Dark mode toggle
+            const toggle = document.getElementById('darkModeToggle');
+            if (toggle) {
+                toggle.addEventListener('click', function () {
+                    document.body.classList.toggle('dark-mode');
+                    localStorage.setItem('bt-dark-mode', document.body.classList.contains('dark-mode'));
+                });
+                // On load
+                if (localStorage.getItem('bt-dark-mode') === 'true') {
+                    document.body.classList.add('dark-mode');
+                }
+            }
+        </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

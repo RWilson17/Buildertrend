@@ -1,0 +1,29 @@
+@model BuildertrendMVC.Models.EstadoCotizacion
+@{
+    ViewData["Title"] = "Editar Estado de Cotización";
+}
+<h2>Editar Estado de Cotización</h2>
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <input asp-for="Descripcion" class="form-control" />
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Orden</label>
+        <input asp-for="Orden" class="form-control" type="number" />
+        <span asp-validation-for="Orden" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="EsActivo" class="form-check-input" />
+        <label class="form-check-label" for="EsActivo">Activo</label>
+    </div>
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a class="btn btn-secondary" href="/EstadoCotizacion">Cancelar</a>
+</form>

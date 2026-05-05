@@ -1,0 +1,25 @@
+@model IEnumerable<BuildertrendMVC.Models.ApplicationRole>
+@{
+    ViewData["Title"] = "Roles";
+}
+<h2>Gestión de Roles</h2>
+<a class="btn btn-primary mb-3" asp-action="Create">Crear nuevo rol</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model)
+        {
+            <tr>
+                <td>@role.Name</td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@role.Id" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este rol?');">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,55 @@
+@model BuildertrendMVC.Models.Quote
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Cotización @Model.QuoteNumber</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; color: #222; }
+        .header { background: #007bff; color: #fff; padding: 20px; border-radius: 8px 8px 0 0; }
+        .title { font-size: 2.2em; margin-bottom: 0; }
+        .info { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #007bff; padding: 10px; }
+        th { background: #e3f0ff; }
+        .totals { font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Cotización @Model.QuoteNumber</div>
+        <div class="info">
+            <b>Estado:</b> @Model.Estado<br />
+            <b>Fecha:</b> @Model.DateCreated.ToString("dd/MM/yyyy")
+        </div>
+    </div>
+    <h3>Partidas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Cost Code</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit Cost</th>
+                <th>Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Items) {
+            <tr>
+                <td>@item.CostCode</td>
+                <td>@item.Title</td>
+                <td>@item.Description</td>
+                <td>@item.Qty</td>
+                <td>@item.UnitCost.ToString("C2")</td>
+                <td>@item.TotalCost.ToString("C2")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <div class="totals">
+        Total cotización: $@(Model.Items?.Sum(i => i.TotalCost).ToString("N2") ?? "0.00")
+    </div>
+</body>
+</html>

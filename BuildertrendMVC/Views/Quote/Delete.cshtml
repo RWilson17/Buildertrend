@@ -1,0 +1,72 @@
+@model BuildertrendMVC.Models.Quote
+@{
+    ViewData["Title"] = "Eliminar Cotización";
+}
+<h2>Eliminar Cotización</h2>
+<div class="alert alert-danger">¿Estás seguro de que deseas eliminar esta cotización?</div>
+<dl class="row">
+            <dt class="col-sm-3">Sales Tax Amount</dt>
+            <dd class="col-sm-9">@Model.SalesTaxAmount.ToString("C2")</dd>
+        <dt class="col-sm-3">Sales Tax</dt>
+        <dd class="col-sm-9">
+            @{
+                decimal stVal;
+                if (decimal.TryParse(Model.SalesTax?.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out stVal))
+                {
+                    @stVal.ToString("P2")
+                }
+                else
+                {
+                    @Model.SalesTax
+                }
+            }
+        </dd>
+    <dt class="col-sm-3">Partidas</dt>
+    <dd class="col-sm-9">
+        @if (Model.Items != null && Model.Items.Any())
+        {
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Cost Code</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Unit Cost</th>
+                        <th>Margin</th>
+                        <th>Customer Cost</th>
+                        <th>Total Cost</th>
+                        <th>Cost Type</th>
+                        <th>Markup %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.CostCode</td>
+                        <td>@item.Title</td>
+                        <td>@item.Description</td>
+                        <td>@item.Qty</td>
+                        <td>@item.UnitCost</td>
+                        <td>@item.Margin</td>
+                        <td>@item.CustomerCost</td>
+                        <td>@item.TotalCost</td>
+                        <td>@item.CostType</td>
+                        <td>@item.MarkupPercentage</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <span class="text-muted">(Sin partidas)</span>
+        }
+    </dd>
+</dl>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a class="btn btn-secondary" href="/Quote">Cancelar</a>
+</form>

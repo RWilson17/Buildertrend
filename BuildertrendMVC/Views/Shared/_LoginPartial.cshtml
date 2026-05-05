@@ -1,0 +1,26 @@
+@using Microsoft.AspNetCore.Identity
+@using BuildertrendMVC.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="dropdown">
+        <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i> @User.Identity.Name
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" asp-area="" asp-controller="Users" asp-action="Edit">Perfil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                    <button type="submit" class="dropdown-item">Cerrar sesión</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <a class="btn btn-outline-light" asp-area="Identity" asp-page="/Account/Login"><i class="bi bi-box-arrow-in-right"></i> Iniciar sesión</a>
+}

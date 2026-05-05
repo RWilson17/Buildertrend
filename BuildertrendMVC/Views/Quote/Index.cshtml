@@ -1,0 +1,211 @@
+@model IEnumerable<BuildertrendMVC.Models.Quote>
+@{
+    ViewData["Title"] = "Cotizaciones";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0"><i class="bi bi-list-columns-reverse"></i> Cotizaciones</h2>
+        <button class="btn btn-success ms-2" onclick="exportTableToCSV('cotizaciones.csv', 'quoteTable')"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
+    </div>
+    <a class="btn btn-primary" href="/Quote/Create"><i class="bi bi-plus-circle"></i> Nueva Cotización</a>
+</div>
+<div class="row mb-3 g-2">
+    <div class="col-md-3">
+        <input type="text" id="filterFolio" class="form-control" placeholder="Filtrar por folio..." />
+    </div>
+    <div class="col-md-3">
+        <input type="number" id="filterMonto" class="form-control" placeholder="Monto mínimo..." step="0.01" min="0" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" id="filterPartidas" class="form-control" placeholder="Buscar en partidas..." />
+    </div>
+    <div class="col-md-3">
+        <input type="text" id="searchQuote" class="form-control" placeholder="Búsqueda general..." />
+    </div>
+</div>
+<div class="table-responsive" style="overflow-x:auto;">
+    <table class="table table-hover align-middle shadow-sm rounded" id="quoteTable" aria-label="Tabla de cotizaciones">
+        <thead class="table-primary text-center" style="background-color:#0d6efd;color:#fff;">
+            <tr>
+                <th style="cursor:pointer" onclick="sortTable(0, 'string')">Folio <i class="bi bi-arrow-down-up"></i></th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Partidas</th>
+                <th style="cursor:pointer" onclick="sortTable(4, 'number')">Total Cotización <i class="bi bi-arrow-down-up"></i></th>
+                <th>Sales Tax</th>
+                <th>Sales Tax Amount</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="quoteTableBody">
+            @foreach (var quote in Model)
+            {
+                <tr>
+                    <td class="fw-bold" style="background-color:#fff;">@quote.QuoteNumber</td>
+                    <td class="text-nowrap" style="background-color:#fff;">@quote.DateCreated.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td style="background-color:#fff;">
+                        <span class="badge bg-secondary" aria-label="Estado">@quote.Estado</span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-info text-dark" title="Cantidad de partidas">
+                                <i class="bi bi-list-ul"></i> @(quote.Items?.Count ?? 0)
+                            </span>
+                            <span class="badge bg-success" title="Monto total">
+                                <i class="bi bi-cash-coin"></i> $@(quote.Items?.Sum(i => i.TotalCost).ToString("N2").Replace('.', ',') ?? "0,00")
+                            </span>
+                            @if (quote.Items == null || !quote.Items.Any())
+                            {
+                                <span class="badge bg-warning text-dark" title="Faltan partidas"><i class="bi bi-exclamation-triangle"></i> Sin partidas</span>
+                            }
+                        </div>
+                        @if (quote.Items != null && quote.Items.Any())
+                        {
+                            <ul class="mb-0 ps-3">
+                                @foreach (var item in quote.Items)
+                                {
+                                    <li><b>@item.CostCode</b>: @item.Title (@item.Qty x $@item.UnitCost.ToString("N2").Replace('.', ','))</li>
+                                }
+                            </ul>
+                        }
+                    </td>
+                    <td class="text-end fw-bold">
+                        $@(quote.Items?.Sum(i => i.TotalCost).ToString("N2").Replace('.', ',') ?? "0,00")
+                    </td>
+                    <td class="text-end">
+                        @if (decimal.TryParse(quote.SalesTax?.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var stVal))
+                        {
+                            @stVal.ToString("P2")
+                        }
+                        else
+                        {
+                            @quote.SalesTax
+                        }
+                    </td>
+                    <td class="text-end">$@quote.SalesTaxAmount.ToString("N2").Replace('.', ',')</td>
+                    <td class="text-center" style="background-color:#fff;">
+                        <a class="btn btn-sm btn-info me-1" href="/Quote/Details/@quote.Id" title="Ver Detalle" aria-label="Ver Detalle"><i class="bi bi-eye"></i></a>
+                        <a class="btn btn-sm btn-warning me-1" href="/Quote/Edit/@quote.Id" title="Editar" aria-label="Editar"><i class="bi bi-pencil-square"></i></a>
+                        <a class="btn btn-sm btn-secondary me-1" href="/Quote/Duplicate/@quote.Id" title="Duplicar" aria-label="Duplicar"><i class="bi bi-files"></i></a>
+                        <form method="post" action="/Quote/Delete/@quote.Id" style="display:inline" onsubmit="return confirm('¿Seguro que deseas eliminar esta cotización?');">
+                            <button type="submit" class="btn btn-sm btn-danger me-1" title="Eliminar" aria-label="Eliminar"><i class="bi bi-trash"></i></button>
+                        </form>
+                        <button class="btn btn-sm btn-outline-primary me-1" title="Enviar por correo" aria-label="Enviar por correo" disabled><i class="bi bi-envelope"></i></button>
+                        <button class="btn btn-sm btn-outline-dark" title="Imprimir" aria-label="Imprimir" disabled><i class="bi bi-printer"></i></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <nav aria-label="Paginación de cotizaciones">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+    </table>
+    <script>
+        // PAGINACIÓN
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        function showPage(page) {
+            var rows = document.querySelectorAll('#quoteTableBody tr');
+            var totalRows = rows.length;
+            var totalPages = Math.ceil(totalRows / rowsPerPage);
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+            rows.forEach((row, i) => {
+                row.style.display = (i >= (page - 1) * rowsPerPage && i < page * rowsPerPage) ? '' : 'none';
+            });
+            renderPagination(totalPages);
+        }
+        function renderPagination(totalPages) {
+            var pag = document.getElementById('pagination');
+            pag.innerHTML = '';
+            if (totalPages <= 1) return;
+            for (let i = 1; i <= totalPages; i++) {
+                var li = document.createElement('li');
+                li.className = 'page-item' + (i === currentPage ? ' active' : '');
+                var a = document.createElement('a');
+                a.className = 'page-link';
+                a.href = '#';
+                a.innerText = i;
+                a.onclick = function(e) { e.preventDefault(); showPage(i); };
+                li.appendChild(a);
+                pag.appendChild(li);
+            }
+        }
+        // Inicializar paginación al cargar
+        document.addEventListener('DOMContentLoaded', function() { showPage(1); });
+
+        // Reaplicar paginación después de filtrar
+        function filtrarCotizacionesYPaginar() {
+            filtrarCotizaciones();
+            showPage(1);
+        }
+        document.getElementById('filterFolio').addEventListener('input', filtrarCotizacionesYPaginar);
+        document.getElementById('filterMonto').addEventListener('input', filtrarCotizacionesYPaginar);
+        document.getElementById('filterPartidas').addEventListener('input', filtrarCotizacionesYPaginar);
+        document.getElementById('searchQuote').addEventListener('input', filtrarCotizacionesYPaginar);
+        // Ordenar tabla por columna (índice y tipo: 'string' o 'number')
+        let sortDirection = {};
+        function sortTable(colIndex, type) {
+            var table = document.getElementById('quoteTable');
+            var tbody = table.tBodies[0];
+            var rows = Array.from(tbody.rows);
+            sortDirection[colIndex] = !sortDirection[colIndex];
+            rows.sort(function(a, b) {
+                let aText = a.cells[colIndex].innerText.trim();
+                let bText = b.cells[colIndex].innerText.trim();
+                if(type === 'number') {
+                    aText = parseFloat(aText.replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
+                    bText = parseFloat(bText.replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
+                }
+                if (aText < bText) return sortDirection[colIndex] ? -1 : 1;
+                if (aText > bText) return sortDirection[colIndex] ? 1 : -1;
+                return 0;
+            });
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        function filtrarCotizaciones() {
+            var folio = document.getElementById('filterFolio').value.toLowerCase();
+            var monto = parseFloat(document.getElementById('filterMonto').value.replace(',', '.')) || 0;
+            var partidas = document.getElementById('filterPartidas').value.toLowerCase();
+            var general = document.getElementById('searchQuote').value.toLowerCase();
+            var rows = document.querySelectorAll('#quoteTable tbody tr');
+            rows.forEach(function(row) {
+                var folioCell = row.querySelector('td.fw-bold')?.innerText.toLowerCase() || '';
+                var montoCell = row.querySelector('td.text-end.fw-bold')?.innerText.replace(/[^\d,\.]/g, '').replace(',', '.') || '0';
+                var partidasCell = row.querySelector('td ul')?.innerText.toLowerCase() || '';
+                var rowText = row.textContent.toLowerCase();
+                var mostrar = true;
+                if (folio && !folioCell.includes(folio)) mostrar = false;
+                if (monto && parseFloat(montoCell) < monto) mostrar = false;
+                if (partidas && !partidasCell.includes(partidas)) mostrar = false;
+                if (general && !rowText.includes(general)) mostrar = false;
+                row.style.display = mostrar ? '' : 'none';
+            });
+        }
+        document.getElementById('filterFolio').addEventListener('input', filtrarCotizaciones);
+        document.getElementById('filterMonto').addEventListener('input', filtrarCotizaciones);
+        document.getElementById('filterPartidas').addEventListener('input', filtrarCotizaciones);
+        document.getElementById('searchQuote').addEventListener('input', filtrarCotizaciones);
+
+        function exportTableToCSV(filename, tableId) {
+            var csv = [];
+            var rows = document.querySelectorAll('#' + tableId + ' tr');
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll('th, td');
+                for (var j = 0; j < cols.length; j++)
+                    row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+                csv.push(row.join(','));
+            }
+            var csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            var downloadLink = document.createElement('a');
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+        }
+    </script>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Crear Rol";
+}
+<h2>Crear nuevo rol</h2>
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label for="name" class="form-label">Nombre del rol</label>
+        <input type="text" class="form-control" id="name" name="name" required />
+    </div>
+    <button type="submit" class="btn btn-success">Crear</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
+
+@section Scripts {
+    @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
+}

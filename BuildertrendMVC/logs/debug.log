@@ -1,0 +1,56 @@
+[2/5/2026 23:47:54] POST Create: Items.Count=1
+  CostType=Material, Qty=1, UnitCost=9000, Margin=0, CustomerCost=0, TotalCost=0
+[2/5/2026 23:53:19] POST Create: Items.Count=1
+  CostType=Material, Qty=1, UnitCost=8000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:03:38] POST Create: Items.Count=1
+  CostType=, Qty=1, UnitCost=10000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:04:19] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=7440, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=1, UnitCost=8000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:04:48] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=7440, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=1, UnitCost=8000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:05:29] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=11000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=2, UnitCost=6000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:05:43] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=11000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=2, UnitCost=6000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:05:48] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=11000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=2, UnitCost=6000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:11:25] POST Create: Items.Count=2
+  CostType=Material, Qty=2, UnitCost=5000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:11:31] POST Create: Items.Count=2
+  CostType=Material, Qty=2, UnitCost=5000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:11:49] POST Create: Items.Count=2
+  CostType=Material, Qty=2, UnitCost=5000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:13:09] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=2, UnitCost=1000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:13:20] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=2, UnitCost=1000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:17:57] POST Create: Items.Count=2
+  CostType=, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Material, Qty=2, UnitCost=1000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:30:57] POST Create: Items.Count=2
+  CostType=Material, Qty=2, UnitCost=1000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Labor, Qty=1, UnitCost=5000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 00:49:34] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=5000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Other, Qty=2, UnitCost=1500, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 01:12:18] POST Create: Items.Count=3
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Labor, Qty=2, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Other, Qty=1, UnitCost=3000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 01:18:53] POST Create: Items.Count=1
+  CostType=, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 01:19:54] POST Create: Items.Count=1
+  CostType=Material, Qty=1, UnitCost=1100, Margin=0, CustomerCost=0, TotalCost=0
+[3/5/2026 01:23:19] POST Create: Items.Count=2
+  CostType=Material, Qty=1, UnitCost=2000, Margin=0, CustomerCost=0, TotalCost=0
+  CostType=Other, Qty=2, UnitCost=1100, Margin=0, CustomerCost=0, TotalCost=0

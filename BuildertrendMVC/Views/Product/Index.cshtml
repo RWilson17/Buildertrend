@@ -1,0 +1,77 @@
+@model IEnumerable<BuildertrendMVC.Models.Product>
+@{
+    ViewData["Title"] = "Productos (Ventanas y Puertas)";
+}
+<h2>Productos</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <a class="btn btn-primary" href="/Product/Create">Agregar Nuevo</a>
+        <button class="btn btn-success ms-2" onclick="exportTableToCSV('productos.csv', 'productTable')"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
+    </div>
+    <input type="text" id="searchProduct" class="form-control w-50" placeholder="Buscar en productos..." />
+</div>
+<table class="table table-bordered" id="productTable">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Modelo</th>
+            <th>Material</th>
+            <th>Color</th>
+            <th>Ancho</th>
+            <th>Alto</th>
+            <th>Cantidad</th>
+            <th>Costo Unitario</th>
+            <th>Costo Total</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Type</td>
+                <td>@item.Model</td>
+                <td>@item.Material</td>
+                <td>@item.Color</td>
+                <td>@item.Width</td>
+                <td>@item.Height</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitCost</td>
+                <td>@item.TotalCost</td>
+                <td>@item.Description</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" href="/Product/Edit/@item.Id">Editar</a>
+                    <a class="btn btn-sm btn-danger" href="/Product/Delete/@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </table>
+    <script>
+        document.getElementById('searchProduct').addEventListener('keyup', function() {
+            var value = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#productTable tbody tr');
+            rows.forEach(function(row) {
+                row.style.display = row.textContent.toLowerCase().includes(value) ? '' : 'none';
+            });
+        });
+        function exportTableToCSV(filename, tableId) {
+            var csv = [];
+            var rows = document.querySelectorAll('#' + tableId + ' tr');
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll('th, td');
+                for (var j = 0; j < cols.length; j++)
+                    row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+                csv.push(row.join(','));
+            }
+            var csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            var downloadLink = document.createElement('a');
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+        }
+    </script>
+    </tbody>
+</table>

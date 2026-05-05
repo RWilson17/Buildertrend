@@ -1,0 +1,28 @@
+@model IEnumerable<BuildertrendMVC.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+<h2>Gestión de Usuarios</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    @string.Join(", ", user.Roles)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-primary btn-sm">Editar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

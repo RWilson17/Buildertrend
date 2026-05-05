@@ -1,0 +1,46 @@
+﻿
+@page
+@model BuildertrendMVC.Areas.Identity.Pages.Account.LoginModel
+
+<div class="login-card">
+    <form action="/Identity/Account/Login?returnUrl=@(Model.ReturnUrl ?? "")" method="post" class="needs-validation" autocomplete="off">
+        <h2 class="text-center mb-4">Iniciar sesión</h2>
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input name="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Correo electrónico" value="@Model?.Input?.Email ?? """ />
+        </div>
+        <span class="text-danger small">@Html.ValidationMessage("Input.Email")</span>
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input name="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Contraseña" type="password" />
+        </div>
+        <span class="text-danger small">@Html.ValidationMessage("Input.Password")</span>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="Input.RememberMe" id="RememberMe" />
+            <label for="RememberMe" class="form-check-label">Recordarme</label>
+        </div>
+        <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary mb-2">Iniciar sesión</button>
+        <div class="links">
+            <a id="forgot-password" href="/Identity/Account/ForgotPassword"><i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?</a>
+            <a href="/Identity/Account/Register?returnUrl=@(Model.ReturnUrl ?? "")"><i class="bi bi-person-plus me-1"></i>Registrarse</a>
+        </div>
+        <div class="links mt-2">
+            <a id="resend-confirmation" href="/Identity/Account/ResendEmailConfirmation"><i class="bi bi-envelope-arrow-up me-1"></i>Reenviar confirmación</a>
+        </div>
+    </form>
+</div>
+
+@if ((Model.ExternalLogins?.Count ?? 0) > 0)
+{
+    <div class="login-card mt-4">
+        <div class="text-center mb-2 text-muted">O accede con</div>
+        <form id="external-account" action="/Identity/Account/ExternalLogin?returnUrl=@(Model.ReturnUrl ?? "")" method="post" class="d-flex flex-column gap-2">
+            @foreach (var provider in Model.ExternalLogins!)
+            {
+                <button type="submit" class="btn btn-outline-primary" name="provider" value="@provider.Name" title="Iniciar sesión con @provider.DisplayName">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>@provider.DisplayName
+                </button>
+            }
+        </form>
+    </div>
+}

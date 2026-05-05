@@ -1,0 +1,160 @@
+@model BuildertrendMVC.ViewModels.QuoteCreateViewModel
+@{
+    ViewData["Title"] = "Editar Cotización";
+}
+<h2>Editar Cotización</h2>
+<div class="mb-3">
+    <label class="form-label">Folio</label>
+    <input class="form-control" value="@Model.QuoteNumber" readonly />
+</div>
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="ClientId" class="form-label">Cliente</label>
+        <select asp-for="ClientId" class="form-select">
+            <option value="">Selecciona un cliente</option>
+            @if (Model.ClientesDisponibles != null)
+            {
+                foreach (var c in Model.ClientesDisponibles)
+                {
+                    <option value="@c.Id" selected="@(Model.ClientId == c.Id ? "selected" : null)">@c.Nombre (@c.Empresa)</option>
+                }
+            }
+        </select>
+        <span asp-validation-for="ClientId" class="text-danger"></span>
+    </div>
+    @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Empleado")))
+    {
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <select asp-for="Estado" class="form-select">
+                <option value="">Selecciona un estado</option>
+                @if (Model.EstadosDisponibles != null)
+                {
+                    foreach (var estado in Model.EstadosDisponibles)
+                    {
+                        <option value="@estado.Nombre" selected="@(Model.Estado == estado.Nombre ? "selected" : null)">@estado.Nombre</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="Estado" class="text-danger"></span>
+        </div>
+    }
+    <div class="mb-3">
+        <label class="form-label">Sales Tax %</label>
+        <select asp-for="SalesTax" class="form-select" id="SalesTax">
+            <option value="">Selecciona una opción</option>
+            <option value="0.07">7</option>
+            <option value="0.0725">7.25</option>
+            <option value="0.0775">7.75</option>
+        </select>
+        <span asp-validation-for="SalesTax" class="text-danger"></span>
+        <small class="form-text text-muted">Selecciona el porcentaje de impuesto a aplicar.</small>
+    </div>
+    <input type="hidden" asp-for="Id" />
+
+    <h4>Archivos adjuntos</h4>
+    <div class="mb-3">
+        <label class="form-label">Selecciona archivos para adjuntar (PDF, imágenes, planos, etc.)</label>
+        <input type="file" name="Attachments" class="form-control" multiple accept=".pdf,image/*,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" />
+        <small class="form-text text-muted">Puedes adjuntar varios archivos.</small>
+    </div>
+    @if (Model.ExistingAttachments != null && Model.ExistingAttachments.Any())
+    {
+        <div class="mb-3">
+            <label class="form-label">Archivos ya adjuntados:</label>
+            <ul>
+                @foreach (var att in Model.ExistingAttachments)
+                {
+                    <li>
+                        <a href="/uploads/@att.FilePath" target="_blank">@att.FileName</a> <span class="text-muted">(@att.UploadedAt.ToString("dd/MM/yyyy HH:mm"))</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    <h4>Partidas de la Cotización</h4>
+    <table class="table table-bordered" id="itemsTable">
+        <thead>
+            <tr>
+                <th>Cost Code</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit Cost</th>
+                <th>Margin</th>
+                <th>Customer Cost</th>
+                <th>Total Cost</th>
+                <th>Cost Type</th>
+                <th>Markup %</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Items.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <select name="Items[@i].CostCode" class="form-select">
+                            @if (Model.Items[i].CostCode == null || Model.Items[i].CostCode == "") {
+                                <option value="" selected>Selecciona</option>
+                            } else {
+                                <option value="">Selecciona</option>
+                            }
+                            @if (Model.Items[i].CostCode == "Andersen") {
+                                <option value="Andersen" selected>Andersen</option>
+                            } else {
+                                <option value="Andersen">Andersen</option>
+                            }
+                            @if (Model.Items[i].CostCode == "Awake") {
+                                <option value="Awake" selected>Awake</option>
+                            } else {
+                                <option value="Awake">Awake</option>
+                            }
+                            @if (Model.Items[i].CostCode == "Trim") {
+                                <option value="Trim" selected>Trim</option>
+                            } else {
+                                <option value="Trim">Trim</option>
+                            }
+                            @if (Model.Items[i].CostCode == "Otro") {
+                                <option value="Otro" selected>Otro</option>
+                            } else {
+                                <option value="Otro">Otro</option>
+                            }
+                        </select>
+                    </td>
+                    <td><input name="Items[@i].Title" class="form-control" value="@Model.Items[i].Title" /></td>
+                    <td><input name="Items[@i].Description" class="form-control" value="@Model.Items[i].Description" /></td>
+                    <td><input name="Items[@i].Qty" class="form-control qty-input" type="number" step="0.01" value="@Model.Items[i].Qty" /></td>
+                    <td><input name="Items[@i].UnitCost" class="form-control unitcost-input" type="number" step="0.01" value="@Model.Items[i].UnitCost" /></td>
+                    <td><input class="form-control margin-output" type="text" value="@Model.Items[i].Margin.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
+                    <td><input class="form-control customercost-output" type="text" value="@Model.Items[i].CustomerCost.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
+                    <td><input class="form-control totalcost-output" type="text" value="@Model.Items[i].TotalCost.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
+                    <td>
+                        <select name="Items[@i].CostType" class="form-select costtype-input">
+                            @{
+                                var val = Model.Items[i].CostType ?? "";
+                            }
+                            <option value="" selected="@(val == "" ? "selected" : null)">Selecciona</option>
+                            <option value="Material" selected="@(val == "Material" ? "selected" : null)">Material</option>
+                            <option value="Labor" selected="@(val == "Labor" ? "selected" : null)">Labor</option>
+                            <option value="Other" selected="@(val == "Other" ? "selected" : null)">Other</option>
+                        </select>
+                    </td>
+                    <td><input class="form-control markup-output" type="text" value="@Model.Items[i].MarkupPercentage.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-primary" onclick="addRow()">Agregar partida</button>
+    <br /><br />
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a class="btn btn-secondary" href="/Quote">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script src="~/js/quote-calc.js"></script>
+}

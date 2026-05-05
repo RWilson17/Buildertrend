@@ -1,0 +1,124 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" width="64" height="64" class="mb-3" alt="Buildertrend Logo" />
+        <h1 class="display-4 fw-bold text-primary mb-2">Bienvenido a Buildertrend</h1>
+        <p class="lead text-secondary mb-4">Gestión profesional de proyectos, productos y cotizaciones en un solo lugar.</p>
+    </div>
+</div>
+<!-- KPIs -->
+<div class="row mb-4 justify-content-center">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center border-0 shadow h-100">
+            <div class="card-body">
+                <div class="mb-2"><i class="bi bi-boxes display-6 text-primary"></i></div>
+                <h6 class="card-title">Productos</h6>
+                <h2 class="fw-bold">@ViewBag.TotalProductos</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center border-0 shadow h-100">
+            <div class="card-body">
+                <div class="mb-2"><i class="bi bi-file-earmark-bar-graph display-6 text-success"></i></div>
+                <h6 class="card-title">Cotizaciones</h6>
+                <h2 class="fw-bold">@ViewBag.TotalCotizaciones</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center border-0 shadow h-100">
+            <div class="card-body">
+                <div class="mb-2"><i class="bi bi-currency-dollar display-6 text-warning"></i></div>
+                <h6 class="card-title">Ventas Totales</h6>
+                <h2 class="fw-bold">$@ViewBag.TotalVentas.ToString("N2")</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Carrusel profesional Bootstrap -->
+<div id="btCarousel" class="carousel slide mb-5 shadow rounded" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#btCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#btCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#btCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner rounded">
+        <div class="carousel-item active bg-light">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80" class="d-block w-100" alt="Gestión de proyectos" style="max-height:340px; object-fit:cover;">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                <h5 class="fw-bold">Gestión Integral de Proyectos</h5>
+                <p>Organiza, controla y haz crecer tus proyectos con herramientas profesionales.</p>
+            </div>
+        </div>
+        <div class="carousel-item bg-light">
+            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=900&q=80" class="d-block w-100" alt="Catálogo de productos" style="max-height:340px; object-fit:cover;">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                <h5 class="fw-bold">Catálogo de Productos</h5>
+                <p>Administra tu inventario y mantén todo bajo control.</p>
+            </div>
+        </div>
+        <div class="carousel-item bg-light">
+            <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=900&q=80" class="d-block w-100" alt="Cotizaciones profesionales" style="max-height:340px; object-fit:cover;">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                <h5 class="fw-bold">Cotizaciones Profesionales</h5>
+                <p>Crea, gestiona y comparte cotizaciones de manera eficiente y moderna.</p>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#btCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#btCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+    </button>
+</div>
+<div class="row g-4 mb-4 justify-content-center">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-box-seam display-5 text-primary mb-3"></i>
+                <h5 class="card-title fw-bold">Productos</h5>
+                <p class="card-text">Administra tu catálogo de productos de manera eficiente.</p>
+                <a href="/Product" class="btn btn-primary w-100">Ver Productos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-excel display-5 text-success mb-3"></i>
+                <h5 class="card-title fw-bold">Importar Datos</h5>
+                <p class="card-text">Carga información desde archivos Excel de forma sencilla.</p>
+                <a href="/Excel/Upload" class="btn btn-success w-100">Importar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-cash-coin display-5 text-warning mb-3"></i>
+                <h5 class="card-title fw-bold">Cotizaciones</h5>
+                <p class="card-text">Genera y administra cotizaciones de manera profesional.</p>
+                <a href="/Quote" class="btn btn-warning w-100 text-white">Ver Cotizaciones</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-primary text-center shadow-sm">
+            <strong>Tip:</strong> Utiliza el menú superior para navegar entre las secciones principales y optimiza tu flujo de trabajo.
+        </div>
+    </div>
+</div>
+<style>
+    .card .bi {
+        font-size: 2.5rem;
+    }
+</style>

@@ -1,0 +1,32 @@
+@model IEnumerable<BuildertrendMVC.Models.EstadoCotizacion>
+@{
+    ViewData["Title"] = "Estados de Cotización";
+}
+<h2>Estados de Cotización</h2>
+<a class="btn btn-primary mb-3" href="/EstadoCotizacion/Create">Nuevo Estado</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Activo</th>
+            <th>Orden</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var estado in Model)
+        {
+            <tr>
+                <td>@estado.Nombre</td>
+                <td>@estado.Descripcion</td>
+                <td>@(estado.EsActivo ? "Sí" : "No")</td>
+                <td>@estado.Orden</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" href="/EstadoCotizacion/Edit/@estado.Id">Editar</a>
+                    <a class="btn btn-sm btn-danger" href="/EstadoCotizacion/Delete/@estado.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

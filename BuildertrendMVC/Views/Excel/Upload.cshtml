@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Cargar Excel";
+}
+
+<h2>Cargar archivo Excel</h2>
+
+<form asp-controller="Excel" asp-action="Upload" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label for="file">Selecciona un archivo Excel:</label>
+        <input type="file" name="file" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Cargar</button>
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info mt-3">@ViewBag.Message</div>
+}
