@@ -1,0 +1,34 @@
+@model BuildertrendMVC.ViewModels.RolePermissionsViewModel
+@{
+    ViewData["Title"] = "Permisos del Rol";
+    var grouped = Model.AllPermissions.GroupBy(p => p.Category).OrderBy(g => g.Key);
+}
+
+<h2>Permisos para el rol: @Model.RoleName</h2>
+
+<form asp-action="Permissions" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="RoleId" />
+
+    @foreach (var category in grouped)
+    {
+        <div class="card mb-3">
+            <div class="card-header fw-bold">@category.Key</div>
+            <div class="card-body">
+                @foreach (var permission in category)
+                {
+                    var isChecked = Model.SelectedPermissionNames.Contains(permission.Name);
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="selectedPermissions" value="@permission.Name" id="perm_@permission.Id" @(isChecked ? "checked" : "") />
+                        <label class="form-check-label" for="perm_@permission.Id">
+                            <strong>@permission.Name</strong> - @permission.Description
+                        </label>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Guardar permisos</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>

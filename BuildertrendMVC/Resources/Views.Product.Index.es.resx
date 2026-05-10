@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ProductsTitle" xml:space="preserve">
+    <value>Productos</value>
+  </data>
+  <data name="CreateProduct" xml:space="preserve">
+    <value>Nuevo Producto</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Detalle</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>Precio</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="SearchProducts" xml:space="preserve">
+    <value>Buscar en productos...</value>
+  </data>
+</root>

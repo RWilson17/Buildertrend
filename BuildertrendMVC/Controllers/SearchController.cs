@@ -6,8 +6,10 @@ using BuildertrendMVC.Models;
 using BuildertrendMVC.ViewModels;
 using System.Collections.Generic;
 
+using Microsoft.AspNetCore.Authorization;
 namespace BuildertrendMVC.Controllers
 {
+    [Authorize]
     public class SearchController : Controller
     {
         private readonly AppDbContext _context;

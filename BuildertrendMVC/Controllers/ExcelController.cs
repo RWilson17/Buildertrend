@@ -7,8 +7,10 @@ using System.IO;
 using BuildertrendMVC.Models;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Authorization;
 namespace BuildertrendMVC.Controllers
 {
+    [Authorize]
     public class ExcelController : Controller
     {
         private readonly AppDbContext _context;

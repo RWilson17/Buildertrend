@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="QuotesTitle" xml:space="preserve">
+    <value>Cotizaciones</value>
+  </data>
+  <data name="CreateQuote" xml:space="preserve">
+    <value>Nueva Cotización</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Detalle</value>
+  </data>
+  <data name="Client" xml:space="preserve">
+    <value>Cliente</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Exportar Excel</value>
+  </data>
+  <data name="FilterByFolio" xml:space="preserve">
+    <value>Filtrar por folio...</value>
+  </data>
+  <data name="MinAmount" xml:space="preserve">
+    <value>Monto mínimo...</value>
+  </data>
+  <data name="SearchInItems" xml:space="preserve">
+    <value>Buscar en partidas...</value>
+  </data>
+  <data name="GeneralSearch" xml:space="preserve">
+    <value>Búsqueda general...</value>
+  </data>
+  <data name="Folio" xml:space="preserve">
+    <value>Folio</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>Partidas</value>
+  </data>
+  <data name="SalesTax" xml:space="preserve">
+    <value>Impuesto</value>
+  </data>
+  <data name="SalesTaxAmount" xml:space="preserve">
+    <value>Monto impuesto</value>
+  </data>
+  <data name="ItemsCount" xml:space="preserve">
+    <value>Cantidad de partidas</value>
+  </data>
+  <data name="TotalAmount" xml:space="preserve">
+    <value>Monto total</value>
+  </data>
+  <data name="NoItems" xml:space="preserve">
+    <value>Sin partidas</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Duplicar</value>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>¿Seguro que deseas eliminar esta cotización?</value>
+  </data>
+</root>

@@ -2,9 +2,11 @@
 function attachRowEvents(row, idx) {
     const qtyInput = row.querySelector('.qty-input');
     const unitCostInput = row.querySelector('.unitcost-input');
+    const marginInput = row.querySelector('.margin-output');
     const costTypeInput = row.querySelector('.costtype-input');
     if (qtyInput) qtyInput.oninput = function () { calcRow(row, idx); updateSalesTaxAmount(); };
     if (unitCostInput) unitCostInput.oninput = function () { calcRow(row, idx); updateSalesTaxAmount(); };
+    if (marginInput) marginInput.oninput = function () { calcRow(row, idx); updateSalesTaxAmount(); };
     if (costTypeInput) costTypeInput.onchange = function () { calcRow(row, idx); updateSalesTaxAmount(); };
 }
 
@@ -18,16 +20,45 @@ function updateSalesTaxAmount() {
         const costType = row.querySelector('.costtype-input')?.value;
         if (costType === 'Material') {
             const totalCostStr = row.querySelector('.totalcost-output')?.value || '0';
-            // Quitar $ y convertir a número
-            const totalCost = parseFloat(totalCostStr.replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
+            const totalCost = parseLocalizedCurrency(totalCostStr);
             total += totalCost;
         }
     });
     const salesTaxAmount = total * salesTax;
     let formatted = salesTaxAmount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    formatted = formatted.replace('.', ',');
     const el = document.getElementById('salesTaxAmountValue');
     if (el) el.textContent = `$${formatted}`;
+}
+
+// Convierte texto moneda con formato en-US o es-XX a número.
+function parseLocalizedCurrency(value) {
+    let cleaned = String(value || '').replace(/[^\d,.-]/g, '').trim();
+    if (!cleaned) return 0;
+
+    const hasComma = cleaned.includes(',');
+    const hasDot = cleaned.includes('.');
+
+    if (hasComma && hasDot) {
+        // es-XX: 80.000,00 -> 80000.00
+        if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
+            cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+        } else {
+            // en-US: 80,000.00 -> 80000.00
+            cleaned = cleaned.replace(/,/g, '');
+        }
+    } else if (hasComma) {
+        const parts = cleaned.split(',');
+        if (parts.length === 2 && parts[1].length <= 2) {
+            cleaned = parts[0].replace(/\./g, '') + '.' + parts[1];
+        } else {
+            cleaned = cleaned.replace(/,/g, '');
+        }
+    } else {
+        cleaned = cleaned.replace(/,/g, '');
+    }
+
+    const parsed = parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : 0;
 }
 
 // Función global para agregar una fila (usada en ambas vistas)
@@ -54,7 +85,7 @@ window.addRow = function() {
                 <option value="Other">Other</option>
             </select>`;
         } else if (fields[i] === "Margin") {
-            cell.innerHTML = `<input class="form-control margin-output" type="text" value="0,00" readonly />`;
+            cell.innerHTML = `<input name="Items[${rowCount}].Margin" class="form-control margin-output" type="number" step="0.01" min="0" max="100" value="35" />`;
         } else if (fields[i] === "CustomerCost") {
             cell.innerHTML = `<input class="form-control customercost-output" type="text" value="0,00" readonly />`;
         } else if (fields[i] === "TotalCost") {
@@ -108,23 +139,26 @@ function calcRow(row, idx) {
 
     const qty = parseFloat(qtyInput.value) || 0;
     const unitCost = parseFloat(unitCostInput.value) || 0;
-    const customerCost = unitCost / 0.65;
-    const margin = customerCost !== 0 ? 1 - (unitCost / customerCost) : 0;
+    const marginRaw = parseFloat((marginInput.value || "0").replace(',', '.')) || 0;
+    let margin = marginRaw > 1 ? (marginRaw / 100) : marginRaw;
+    margin = Math.min(Math.max(margin, 0), 0.99);
+    const divisor = 1 - margin;
+    const customerCost = divisor > 0 ? (unitCost / divisor) : 0;
     let markupPercentage = 0;
     if (margin < 1 && margin > 0) {
         markupPercentage = (margin / (1 - margin)) * 100;
     }
     const totalCost = qty * customerCost;
 
-    // Formatea con coma como separador decimal (es-MX)
-    // Forzar idioma y región para navegadores que ignoran 'es-MX'
+    // Formatea con coma como separador decimal (es-MX) para campos de solo lectura.
+    // En margin (type=number) se mantiene formato con punto para no bloquear la escritura.
     const locale = navigator.languages && navigator.languages.includes('es-MX') ? 'es-MX' : (navigator.languages && navigator.languages.includes('es') ? 'es' : 'es-ES');
-    marginInput.value = margin.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (document.activeElement !== marginInput) {
+        marginInput.value = (margin * 100).toFixed(2);
+    }
     customerCostInput.value = customerCost.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     totalCostInput.value = totalCost.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     markupInput.value = markupPercentage.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    // Depuración: mostrar en consola el valor formateado
-    console.log('margin', marginInput.value, 'locale', locale);
 }
 
 // Asigna eventos a todos los inputs relevantes de cada fila

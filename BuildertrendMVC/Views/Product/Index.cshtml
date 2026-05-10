@@ -1,29 +1,30 @@
 @model IEnumerable<BuildertrendMVC.Models.Product>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Productos (Ventanas y Puertas)";
+    ViewData["Title"] = Localizer["ProductsTitle"];
 }
-<h2>Productos</h2>
+<h2>@Localizer["ProductsTitle"]</h2>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <a class="btn btn-primary" href="/Product/Create">Agregar Nuevo</a>
+        <a class="btn btn-primary" href="/Product/Create">@Localizer["CreateProduct"]</a>
         <button class="btn btn-success ms-2" onclick="exportTableToCSV('productos.csv', 'productTable')"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
     </div>
-    <input type="text" id="searchProduct" class="form-control w-50" placeholder="Buscar en productos..." />
+    <input type="text" id="searchProduct" class="form-control w-50" placeholder="@Localizer["SearchProducts"]" />
 </div>
 <table class="table table-bordered" id="productTable">
     <thead>
         <tr>
-            <th>Tipo</th>
+            <th>@Localizer["Name"]</th>
             <th>Modelo</th>
             <th>Material</th>
             <th>Color</th>
             <th>Ancho</th>
             <th>Alto</th>
             <th>Cantidad</th>
-            <th>Costo Unitario</th>
+            <th>@Localizer["Price"]</th>
             <th>Costo Total</th>
             <th>Descripción</th>
-            <th>Acciones</th>
+            <th>@Localizer["Actions"]</th>
         </tr>
     </thead>
     <tbody>

@@ -2,9 +2,10 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BuildertrendMVC.Models;
 
+using Microsoft.AspNetCore.Authorization;
 namespace BuildertrendMVC.Controllers;
 
-
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -18,20 +19,15 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var totalProductos = _context.Products.Count();
-        var totalCotizaciones = _context.Quotes.Count();
-        // Sumar CustomerCost de todas las partidas de todas las cotizaciones
-        var quotes = _context.Quotes.ToList();
-        decimal totalVentas = 0;
-        foreach (var q in quotes)
+        if (!User.Identity.IsAuthenticated)
         {
-            if (q.Items != null)
-                totalVentas += q.Items.Sum(i => i.CustomerCost);
+            return Redirect("/Identity/Account/Login");
         }
-
-        ViewBag.TotalProductos = totalProductos;
-        ViewBag.TotalCotizaciones = totalCotizaciones;
-        ViewBag.TotalVentas = totalVentas;
+        ViewBag.TotalProductos = _context.Products?.Count() ?? 0;
+        ViewBag.TotalCotizaciones = _context.Quotes?.Count() ?? 0;
+        // Sumar los TotalCost de todos los QuoteItems
+        var quoteItems = _context.QuoteItems?.ToList() ?? new List<BuildertrendMVC.Models.QuoteItem>();
+        ViewBag.TotalVentas = quoteItems.Sum(qi => qi.TotalCost);
         return View();
     }
 

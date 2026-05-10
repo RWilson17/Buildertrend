@@ -28,5 +28,11 @@ namespace BuildertrendMVC.Models
         // Relación con cliente
         public int? ClientId { get; set; }
         public Client? Client { get; set; }
+
+        // Historial de versiones de la cotización
+        public ICollection<QuoteVersion> Versions { get; set; } = new List<QuoteVersion>();
+
+        // Firma electrónica asociada
+        public QuoteSignature? Signature { get; set; }
     }
 }

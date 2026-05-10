@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BuildertrendMVC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d137c3cafd02083bb95c4b44e04a2bcffcfceebb")]
 [assembly: System.Reflection.AssemblyProductAttribute("BuildertrendMVC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BuildertrendMVC")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

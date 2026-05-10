@@ -1,4 +1,5 @@
 ﻿@using BuildertrendMVC.Models
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +34,7 @@
                     var primaryColor = BuildertrendMVC.Models.SettingsViewModel.CurrentPrimaryColor;
                 }
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="@logoUrl" width="32" height="32" class="d-inline-block align-top me-2" alt="Logo" />
+                    <!-- Logo eliminado por solicitud del usuario -->
                     <span>@companyName</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,45 +43,45 @@
                 <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            <a class="nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">@Localizer["Dashboard"]</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">Productos</a>
-                        </li>
-                           <li class="nav-item">
-                               <a class="nav-link" asp-area="" asp-controller="Client" asp-action="Index">Clientes</a>
-                           </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Quote" asp-action="Index">Cotizaciones</a>
+                            <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">@Localizer["Products"]</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Search" asp-action="Index"><i class="bi bi-search"></i> Buscador</a>
+                            <a class="nav-link" asp-area="" asp-controller="Client" asp-action="Index">@Localizer["Clients"]</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Excel" asp-action="Upload">Importar</a>
+                            <a class="nav-link" asp-area="" asp-controller="Quote" asp-action="Index">@Localizer["Quotes"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Search" asp-action="Index"><i class="bi bi-search"></i> @Localizer["Search"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Excel" asp-action="Upload">@Localizer["Import"]</a>
                         </li>
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Roles" asp-action="Index">Roles</a>
+                                <a class="nav-link" asp-area="" asp-controller="Roles" asp-action="Index">@Localizer["Roles"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">Usuarios</a>
+                                <a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">@Localizer["Users"]</a>
                             </li>
                         }
                         <li class="nav-item">
                             @if (User.IsInRole("Admin"))
                             {
-                                <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Configuración</a>
+                                <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">@Localizer["Settings"]</a>
                             }
                         </li>
                         <li class="nav-item">
                             @if (User.IsInRole("Admin"))
                             {
-                                <a class="nav-link" asp-area="" asp-controller="Audit" asp-action="Index">Historial</a>
+                                <a class="nav-link" asp-area="" asp-controller="Audit" asp-action="Index">@Localizer["History"]</a>
                             }
                         </li>
                     </ul>

@@ -1,4 +1,5 @@
 @model BuildertrendMVC.Models.Quote
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Eliminar Cotización";
 }
@@ -6,7 +7,7 @@
 <div class="alert alert-danger">¿Estás seguro de que deseas eliminar esta cotización?</div>
 <dl class="row">
             <dt class="col-sm-3">Sales Tax Amount</dt>
-            <dd class="col-sm-9">@Model.SalesTaxAmount.ToString("C2")</dd>
+            <dd class="col-sm-9">@GetCurrencySymbol(ViewBag.Currency)@FormatAmount(Model.SalesTaxAmount, ViewBag.Currency, ViewBag.Language)</dd>
         <dt class="col-sm-3">Sales Tax</dt>
         <dd class="col-sm-9">
             @{
@@ -28,16 +29,16 @@
             <table class="table table-bordered table-sm">
                 <thead>
                     <tr>
-                        <th>Cost Code</th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Qty</th>
-                        <th>Unit Cost</th>
-                        <th>Margin</th>
-                        <th>Customer Cost</th>
-                        <th>Total Cost</th>
-                        <th>Cost Type</th>
-                        <th>Markup %</th>
+                        <th>@Localizer["CostCode"]</th>
+                        <th>@Localizer["Title"]</th>
+                        <th>@Localizer["Description"]</th>
+                        <th>@Localizer["Qty"]</th>
+                        <th>@Localizer["UnitCost"]</th>
+                        <th>@Localizer["MarginPercent"]</th>
+                        <th>@Localizer["CustomerCost"]</th>
+                        <th>@Localizer["TotalCost"]</th>
+                        <th>@Localizer["CostType"]</th>
+                        <th>@Localizer["MarkupPercent"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,10 +49,38 @@
                         <td>@item.Title</td>
                         <td>@item.Description</td>
                         <td>@item.Qty</td>
-                        <td>@item.UnitCost</td>
-                        <td>@item.Margin</td>
-                        <td>@item.CustomerCost</td>
-                        <td>@item.TotalCost</td>
+                        <td>@GetCurrencySymbol(ViewBag.Currency)@FormatAmount(item.UnitCost, ViewBag.Currency, ViewBag.Language)</td>
+                        <td>@FormatAmount(item.Margin * 100, ViewBag.Currency, ViewBag.Language)</td>
+                        <td>@GetCurrencySymbol(ViewBag.Currency)@FormatAmount(item.CustomerCost, ViewBag.Currency, ViewBag.Language)</td>
+                        <td>@GetCurrencySymbol(ViewBag.Currency)@FormatAmount(item.TotalCost, ViewBag.Currency, ViewBag.Language)</td>
+                        @functions {
+                            public static string GetCurrencySymbol(string currency)
+                            {
+                                return currency switch
+                                {
+                                    "USD" => "$",
+                                    "EUR" => "€",
+                                    "MXN" => "$MXN ",
+                                    "CLP" => "$CLP ",
+                                    "ARS" => "$ARS ",
+                                    _ => "$"
+                                };
+                            }
+                            public static string FormatAmount(decimal amount, string currency, string language)
+                            {
+                                var culture = (currency, language) switch
+                                {
+                                    ("USD", "en") => "en-US",
+                                    ("USD", _) => "es-MX",
+                                    ("EUR", _) => "es-ES",
+                                    ("MXN", _) => "es-MX",
+                                    ("CLP", _) => "es-CL",
+                                    ("ARS", _) => "es-AR",
+                                    _ => "es-MX"
+                                };
+                                return amount.ToString("N2", new System.Globalization.CultureInfo(culture));
+                            }
+                        }
                         <td>@item.CostType</td>
                         <td>@item.MarkupPercentage</td>
                     </tr>

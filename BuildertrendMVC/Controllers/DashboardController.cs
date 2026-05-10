@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using BuildertrendMVC.Models;
 using BuildertrendMVC.ViewModels;
 
+using Microsoft.AspNetCore.Authorization;
 namespace BuildertrendMVC.Controllers
 {
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly AppDbContext _context;

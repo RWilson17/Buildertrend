@@ -1,27 +1,391 @@
 @model BuildertrendMVC.Models.UserEditViewModel
 @{
-    ViewData["Title"] = "Editar Usuario";
+    ViewData["Title"] = "Mi Perfil";
+    var emailParts = Model.Email?.Split('@')[0].Take(2).ToArray();
+    var emailInitials = emailParts != null ? new string(emailParts) : "??";
 }
-<h2>Editar Usuario</h2>
-<form asp-action="Edit" method="post">
-    <input type="hidden" name="Id" value="@Model.Id" />
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" value="@Model.Email" readonly />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Roles</label>
-        @foreach (var role in Model.AllRoles)
-        {
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role" id="role_@role" @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
-                <label class="form-check-label" for="role_@role">@role</label>
+
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: bold;
+        border: 3px solid white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        border-radius: 12px 12px 0 0;
+        padding: 16px 20px;
+    }
+
+    .role-option {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: white;
+    }
+
+    .role-option:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+
+    .role-option input:checked + label {
+        color: #667eea;
+    }
+
+    .role-option input:checked {
+        border-color: #667eea;
+    }
+
+    .role-checkbox {
+        width: 22px;
+        height: 22px;
+        margin-right: 12px;
+        cursor: pointer;
+        accent-color: #667eea;
+    }
+
+    .form-select, .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 10px 12px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+    }
+
+    .badge-role {
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 20px;
+        margin: 4px 4px 4px 0;
+        display: inline-block;
+    }
+
+    .badge-admin {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .badge-empleado {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .badge-gerente {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .badge-cliente {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+    }
+
+    .badge-contador {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: #333;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-cancel {
+        background: #e9ecef;
+        color: #495057;
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #dee2e6;
+        transform: translateY(-2px);
+    }
+
+    .info-box {
+        background: #f8f9ff;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .divider {
+        height: 1px;
+        background: linear-gradient(90deg, #e9ecef 0%, #667eea 50%, #e9ecef 100%);
+        margin: 30px 0;
+    }
+
+    .role-description {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Encabezado del Perfil -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="profile-avatar">👤</div>
             </div>
-        }
+            <div class="col">
+                <h1 class="mb-2">Mi Perfil</h1>
+                <p class="mb-0 opacity-75">Gestiona tu cuenta, roles y preferencias</p>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-success">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-</form>
+
+    <form asp-action="@(Model.AllRoles != null && Model.AllRoles.Count > 0 ? "Edit" : "PerfilSave")" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div class="row g-4">
+            <!-- Columna Principal (Información y Roles) -->
+            <div class="col-lg-8">
+                <!-- Información del Usuario -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">📧 Información de la Cuenta</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-box">
+                            <strong>Email:</strong> <code>@Model.Email</code>
+                            <br />
+                            <small class="text-muted">El email no puede modificarse</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asignación de Roles (Solo si es Admin editando a otros) -->
+                @if (Model.AllRoles != null && Model.AllRoles.Count > 0)
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">🔐 Roles y Permisos</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">Selecciona los roles que deseas asignar a este usuario</p>
+                            <div class="roles-grid">
+                                @foreach (var role in Model.AllRoles)
+                                {
+                                    <div class="role-option">
+                                        <input type="checkbox" 
+                                               class="role-checkbox" 
+                                               name="SelectedRoles" 
+                                               value="@role" 
+                                               id="role_@role"
+                                               @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                                        <label for="role_@role" class="form-check-label flex-grow-1">
+                                            <span class="fw-bold">@role</span>
+                                            <div class="role-description">@GetRoleDescription(role)</div>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Columna Lateral (Preferencias y Resumen) -->
+            <div class="col-lg-4">
+                <!-- Preferencias -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">⚙️ Preferencias</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-flex align-items-center gap-2">
+                                💱 Moneda Preferida
+                            </label>
+                            <select class="form-select" asp-for="Currency">
+                                <option value="USD">USD - Dólar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="MXN">MXN - Peso Mexicano</option>
+                                <option value="CLP">CLP - Peso Chileno</option>
+                                <option value="ARS">ARS - Peso Argentino</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label fw-bold d-flex align-items-center gap-2">
+                                🌐 Idioma Preferido
+                            </label>
+                            <select class="form-select" asp-for="Language">
+                                <option value="es">Español</option>
+                                <option value="en">Inglés</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen de Roles Asignados -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">📋 Roles Asignados</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="selectedRolesDisplay">
+                            @if (Model.SelectedRoles != null && Model.SelectedRoles.Any())
+                            {
+                                @foreach (var role in Model.SelectedRoles)
+                                {
+                                    <span class="badge-role badge-@role.ToLower()">
+                                        @GetRoleIcon(role) @role
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-muted text-center py-3">
+                                    <small>Sin roles asignados</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="divider"></div>
+        <div class="d-flex gap-2 justify-content-center">
+            <button type="submit" class="btn btn-save btn-lg text-white">
+                ✅ Guardar Cambios
+            </button>
+            <a asp-action="Index" class="btn btn-cancel btn-lg">
+                ❌ Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
 @section Scripts {
     @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
+    <script>
+        const roleCheckboxes = document.querySelectorAll('input[name="SelectedRoles"]');
+
+        // In profile mode there are no role checkboxes; keep server-rendered role badges.
+        if (roleCheckboxes.length === 0) {
+            // No-op
+        } else {
+        // Actualizar resumen de roles en tiempo real
+        function updateRolesSummary() {
+            const selected = [];
+            document.querySelectorAll('input[name="SelectedRoles"]:checked').forEach(c => {
+                selected.push(c.value);
+            });
+            const display = document.getElementById('selectedRolesDisplay');
+            if (selected.length === 0) {
+                display.innerHTML = '<div class="text-muted text-center py-3"><small>Sin roles asignados</small></div>';
+            } else {
+                display.innerHTML = selected.map(r => {
+                    const icon = @Html.Raw(
+                        "{'Admin':'👑','Empleado':'👨‍💼','Gerente':'👔','Cliente':'👤','Contador':'📊'}");
+                    return `<span class="badge-role badge-${r.toLowerCase()}">${icon[r] || '•'} ${r}</span>`;
+                }).join('');
+            }
+        }
+
+        roleCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateRolesSummary);
+        });
+
+        // Inicializar al cargar
+        updateRolesSummary();
+        }
+    </script>
 }
+
+@functions {
+    private string GetRoleDescription(string roleName)
+    {
+        return roleName switch
+        {
+            "Admin" => "Acceso total al sistema, gestión de usuarios y configuración",
+            "Empleado" => "Crear y editar cotizaciones, ver costos y firmar",
+            "Gerente" => "Supervisión de cotizaciones, aprobación y reportes",
+            "Cliente" => "Acceso limitado solo a ver y firmar cotizaciones propias",
+            "Contador" => "Acceso a cotizaciones y detalles financieros",
+            _ => "Rol personalizado"
+        };
+    }
+
+    private string GetRoleIcon(string roleName)
+    {
+        return roleName switch
+        {
+            "Admin" => "👑",
+            "Empleado" => "👨‍💼",
+            "Gerente" => "👔",
+            "Cliente" => "👤",
+            "Contador" => "📊",
+            _ => "•"
+        };
+    }
+}
+
+

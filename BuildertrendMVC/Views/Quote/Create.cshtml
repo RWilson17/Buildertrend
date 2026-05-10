@@ -1,4 +1,5 @@
 @model BuildertrendMVC.ViewModels.QuoteCreateViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Nueva Cotización";
 }
@@ -74,17 +75,17 @@
     <table class="table table-bordered" id="itemsTable">
         <thead>
             <tr>
-                <th>Cost Code</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Qty</th>
-                <th>Unit Cost</th>
-                <th>Margin</th>
-                <th>Customer Cost</th>
-                <th>Total Cost</th>
-                <th>Cost Type</th>
-                <th>Markup %</th>
-                <th>Acciones</th>
+                <th>@Localizer["CostCode"]</th>
+                <th>@Localizer["Title"]</th>
+                <th>@Localizer["Description"]</th>
+                <th>@Localizer["Qty"]</th>
+                <th>@Localizer["UnitCost"]</th>
+                <th>@Localizer["MarginPercent"]</th>
+                <th>@Localizer["CustomerCost"]</th>
+                <th>@Localizer["TotalCost"]</th>
+                <th>@Localizer["CostType"]</th>
+                <th>@Localizer["MarkupPercent"]</th>
+                <th>@Localizer["Actions"]</th>
             </tr>
         </thead>
         <tbody>
@@ -124,9 +125,9 @@
                     <td><input name="Items[@i].Description" class="form-control" value="@Model.Items[i].Description" /></td>
                     <td><input name="Items[@i].Qty" class="form-control qty-input" type="number" step="0.01" value="@Model.Items[i].Qty" /></td>
                     <td><input name="Items[@i].UnitCost" class="form-control unitcost-input" type="number" step="0.01" value="@Model.Items[i].UnitCost" /></td>
-                    <td><input class="form-control margin-output" type="text" value="@Model.Items[i].Margin.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
-                    <td><input class="form-control customercost-output" type="text" value="@Model.Items[i].CustomerCost.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
-                    <td><input class="form-control totalcost-output" type="text" value="@Model.Items[i].TotalCost.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("es-MX"))" readonly /></td>
+                    <td><input name="Items[@i].Margin" class="form-control margin-output" type="number" step="0.01" min="0" max="100" value="@((Model.Items[i].Margin > 0 ? (Model.Items[i].Margin * 100) : 35).ToString(System.Globalization.CultureInfo.InvariantCulture))" /></td>
+                    <td><input class="form-control customercost-output" type="text" value="@GetCurrencySymbol(ViewBag.Currency)@FormatAmount(Model.Items[i].CustomerCost, ViewBag.Currency, ViewBag.Language)" readonly /></td>
+                    <td><input class="form-control totalcost-output" type="text" value="@GetCurrencySymbol(ViewBag.Currency)@FormatAmount(Model.Items[i].TotalCost, ViewBag.Currency, ViewBag.Language)" readonly /></td>
                     <td>
                         <select name="Items[@i].CostType" class="form-select costtype-input">
                             @{
@@ -147,8 +148,36 @@
         </tbody>
     </table>
     <div class="alert alert-info mt-3" id="salesTaxAmountSummary">
-        <strong>Sales Tax Amount estimado:</strong> <span id="salesTaxAmountValue">$0.00</span>
+        <strong>Sales Tax Amount estimado:</strong> <span id="salesTaxAmountValue">@GetCurrencySymbol(ViewBag.Currency)0.00</span>
     </div>
+    @functions {
+        public static string GetCurrencySymbol(string currency)
+        {
+            return currency switch
+            {
+                "USD" => "$",
+                "EUR" => "€",
+                "MXN" => "$MXN ",
+                "CLP" => "$CLP ",
+                "ARS" => "$ARS ",
+                _ => "$"
+            };
+        }
+        public static string FormatAmount(decimal amount, string currency, string language)
+        {
+            var culture = (currency, language) switch
+            {
+                ("USD", "en") => "en-US",
+                ("USD", _) => "es-MX",
+                ("EUR", _) => "es-ES",
+                ("MXN", _) => "es-MX",
+                ("CLP", _) => "es-CL",
+                ("ARS", _) => "es-AR",
+                _ => "es-MX"
+            };
+            return amount.ToString("N2", new System.Globalization.CultureInfo(culture));
+        }
+    }
     <button type="button" class="btn btn-primary" onclick="addRow()">Agregar partida</button>
     <br /><br />
     <button type="submit" class="btn btn-success">Guardar</button>
@@ -158,5 +187,5 @@
 
 
 @section Scripts {
-    <script src="~/js/quote-calc.js"></script>
+    <script src="~/js/quote-calc.js" asp-append-version="true"></script>
 }

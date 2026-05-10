@@ -4,8 +4,10 @@ using BuildertrendMVC.Models;
 using System.Threading.Tasks;
 using System.Linq;
 
+using Microsoft.AspNetCore.Authorization;
 namespace BuildertrendMVC.Controllers
 {
+    [Authorize]
     public class ClientController : Controller
     {
         private readonly AppDbContext _context;

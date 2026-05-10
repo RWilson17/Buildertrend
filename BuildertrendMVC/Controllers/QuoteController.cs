@@ -5,9 +5,17 @@ using BuildertrendMVC.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using BuildertrendMVC.ViewModels;
+using BuildertrendMVC.Attributes;
+using BuildertrendMVC.Services;
+using System.Text;
+using System.Text.Json;
+using System.Security.Cryptography;
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 namespace BuildertrendMVC.Controllers
 {
+    [Authorize]
     public class QuoteController : Controller
     {
 
@@ -50,17 +58,40 @@ namespace BuildertrendMVC.Controllers
         private readonly AppDbContext _context;
         private readonly Services.AuditService _auditService;
         private readonly Services.EmailService _emailService;
-        public QuoteController(AppDbContext context, Services.AuditService auditService, Services.EmailService emailService)
+        private readonly IPermissionService _permissionService;
+        public QuoteController(AppDbContext context, Services.AuditService auditService, Services.EmailService emailService, IPermissionService permissionService)
         {
             _context = context;
             _auditService = auditService;
             _emailService = emailService;
+            _permissionService = permissionService;
         }
 
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-            var quote = await _context.Quotes.Include(q => q.Items).Include(q => q.Attachments).FirstOrDefaultAsync(q => q.Id == id);
+            var quote = await _context.Quotes
+                .Include(q => q.Items)
+                .Include(q => q.Attachments)
+                .Include(q => q.Signature)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            // Obtener preferencias del usuario
+            string currency = "USD", language = "es";
+            if (User.Identity.IsAuthenticated)
+            {
+                var userManager = HttpContext.RequestServices.GetService(typeof(UserManager<ApplicationUser>)) as UserManager<ApplicationUser>;
+                var user = await userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    currency = user.Currency ?? "USD";
+                    language = user.Language ?? "es";
+                }
+            }
+            ViewBag.Currency = currency;
+            ViewBag.Language = language;
+            ViewBag.CanViewCosts = await CurrentUserHasPermissionAsync("quote:view-costs");
+            ViewBag.CanSign = await CurrentUserHasPermissionAsync("quote:sign");
+            ViewBag.CanRestoreVersions = await CurrentUserHasPermissionAsync("quote:restore-version");
             if (quote == null) return NotFound();
             // Obtener historial de cambios
             var audit = await _context.AuditLogs
@@ -77,6 +108,11 @@ namespace BuildertrendMVC.Controllers
             // Obtener eventos de calendario
             var events = await _context.QuoteEvents.Where(e => e.QuoteId == quote.Id).OrderBy(e => e.Date).ToListAsync();
             ViewBag.QuoteEvents = events;
+            var versions = await _context.QuoteVersions
+                .Where(v => v.QuoteId == quote.Id)
+                .OrderByDescending(v => v.VersionNumber)
+                .ToListAsync();
+            ViewBag.QuoteVersions = versions;
             return View(quote);
         }
 
@@ -217,9 +253,16 @@ namespace BuildertrendMVC.Controllers
             {
                 foreach (var item in vm.Items)
                 {
-                    item.CustomerCost = item.UnitCost / 0.65m;
-                    item.Margin = item.CustomerCost != 0 ? 1 - (item.UnitCost / item.CustomerCost) : 0;
-                    item.MarkupPercentage = (item.Margin < 1 && item.Margin > 0) ? (item.Margin / (1 - item.Margin)) * 100 : 0;
+                    var margin = item.Margin;
+                    if (margin > 1m)
+                    {
+                        margin /= 100m;
+                    }
+                    margin = Math.Min(Math.Max(margin, 0m), 0.99m);
+                    item.Margin = margin;
+                    var divisor = 1m - margin;
+                    item.CustomerCost = divisor > 0m ? (item.UnitCost / divisor) : 0m;
+                    item.MarkupPercentage = (margin < 1m && margin > 0m) ? (margin / (1m - margin)) * 100m : 0m;
                     item.TotalCost = item.Qty * item.CustomerCost;
                 }
             }
@@ -231,11 +274,17 @@ namespace BuildertrendMVC.Controllers
                 {
                     ModelState.AddModelError("Estado", "Selecciona un estado válido.");
                 }
+                if (vm.Estado == "Aprobada" && !await CurrentUserHasPermissionAsync("quote:approve"))
+                {
+                    ModelState.AddModelError("Estado", "No tienes permisos para aprobar cotizaciones.");
+                }
             }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    await CreateVersionSnapshotAsync(quote, "Respaldo previo a edición");
+
                     // Historial de cambios por campo
                     var cambios = new List<string>();
                     // Cotización
@@ -426,9 +475,16 @@ namespace BuildertrendMVC.Controllers
             {
                 foreach (var item in vm.Items)
                 {
-                    item.CustomerCost = item.UnitCost / 0.65m;
-                    item.Margin = item.CustomerCost != 0 ? 1 - (item.UnitCost / item.CustomerCost) : 0;
-                    item.MarkupPercentage = (item.Margin < 1 && item.Margin > 0) ? (item.Margin / (1 - item.Margin)) * 100 : 0;
+                    var margin = item.Margin;
+                    if (margin > 1m)
+                    {
+                        margin /= 100m;
+                    }
+                    margin = Math.Min(Math.Max(margin, 0m), 0.99m);
+                    item.Margin = margin;
+                    var divisor = 1m - margin;
+                    item.CustomerCost = divisor > 0m ? (item.UnitCost / divisor) : 0m;
+                    item.MarkupPercentage = (margin < 1m && margin > 0m) ? (margin / (1m - margin)) * 100m : 0m;
                     item.TotalCost = item.Qty * item.CustomerCost;
                 }
             }
@@ -486,6 +542,7 @@ namespace BuildertrendMVC.Controllers
                     }
 
                     _auditService.Log("Quote", quote.Id.ToString(), "Create", $"Cotización creada con {quote.Items.Count} partidas, folio: {quote.QuoteNumber}");
+                    await CreateVersionSnapshotAsync(quote, "Versión inicial");
                     TempData["SuccessMessage"] = $"Cotización creada exitosamente. Folio: {quote.QuoteNumber}";
                     return RedirectToAction(nameof(Index));
                 }
@@ -510,6 +567,21 @@ namespace BuildertrendMVC.Controllers
         public async Task<IActionResult> Index()
         {
             var quotes = await _context.Quotes.Include(q => q.Items).OrderByDescending(q => q.Id).ToListAsync();
+            // Obtener preferencias del usuario
+            string currency = "USD", language = "es";
+            if (User.Identity.IsAuthenticated)
+            {
+                var userManager = HttpContext.RequestServices.GetService(typeof(UserManager<ApplicationUser>)) as UserManager<ApplicationUser>;
+                var user = await userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    currency = user.Currency ?? "USD";
+                    language = user.Language ?? "es";
+                }
+            }
+            ViewBag.Currency = currency;
+            ViewBag.Language = language;
+            ViewBag.CanViewCosts = await CurrentUserHasPermissionAsync("quote:view-costs");
             return View(quotes);
         }
 
@@ -546,11 +618,116 @@ namespace BuildertrendMVC.Controllers
             };
             _context.Quotes.Add(newQuote);
             await _context.SaveChangesAsync();
+            await CreateVersionSnapshotAsync(newQuote, "Versión inicial (duplicada)");
             TempData["SuccessMessage"] = $"Cotización duplicada exitosamente. Folio: {newQuote.QuoteNumber}";
             return RedirectToAction("Index");
         }
 
+        [Permission("quote:restore-version")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreVersion(int quoteId, int versionId)
+        {
+            var quote = await _context.Quotes.Include(q => q.Items).FirstOrDefaultAsync(q => q.Id == quoteId);
+            if (quote == null) return NotFound();
+
+            var version = await _context.QuoteVersions.FirstOrDefaultAsync(v => v.Id == versionId && v.QuoteId == quoteId);
+            if (version == null) return NotFound();
+
+            var snapshot = JsonSerializer.Deserialize<QuoteSnapshot>(version.SnapshotJson);
+            if (snapshot == null)
+            {
+                TempData["ErrorMessage"] = "No se pudo restaurar la versión seleccionada.";
+                return RedirectToAction("Details", new { id = quoteId });
+            }
+
+            await CreateVersionSnapshotAsync(quote, "Respaldo antes de restauración");
+
+            quote.SalesTax = snapshot.SalesTax;
+            quote.Estado = snapshot.Estado;
+            quote.ClientId = snapshot.ClientId;
+
+            _context.QuoteItems.RemoveRange(quote.Items);
+            quote.Items = snapshot.Items.Select(i => new QuoteItem
+            {
+                CostCode = i.CostCode,
+                Title = i.Title,
+                Description = i.Description,
+                Qty = i.Qty,
+                UnitCost = i.UnitCost,
+                Margin = i.Margin,
+                CustomerCost = i.CustomerCost,
+                TotalCost = i.TotalCost,
+                CostType = i.CostType,
+                MarkupPercentage = i.MarkupPercentage,
+            }).ToList();
+
+            var salesTaxValue = TryParseSalesTax(quote.SalesTax);
+            quote.SalesTaxAmount = quote.Items.Where(x => x.CostType == "Material").Sum(x => x.TotalCost * salesTaxValue);
+
+            await _context.SaveChangesAsync();
+            _auditService.Log("Quote", quote.Id.ToString(), "RestoreVersion", $"Restaurada versión #{version.VersionNumber}");
+
+            TempData["SuccessMessage"] = $"Versión #{version.VersionNumber} restaurada correctamente.";
+            return RedirectToAction("Details", new { id = quoteId });
+        }
+
+        [Permission("quote:sign")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Sign(int quoteId, string signerName, string signerEmail, bool acceptedTerms)
+        {
+            var quote = await _context.Quotes.Include(q => q.Signature).FirstOrDefaultAsync(q => q.Id == quoteId);
+            if (quote == null) return NotFound();
+
+            if (quote.Signature != null)
+            {
+                TempData["ErrorMessage"] = "Esta cotización ya fue firmada.";
+                return RedirectToAction("Details", new { id = quoteId });
+            }
+
+            if (string.IsNullOrWhiteSpace(signerName) || string.IsNullOrWhiteSpace(signerEmail))
+            {
+                TempData["ErrorMessage"] = "Nombre y correo del firmante son obligatorios.";
+                return RedirectToAction("Details", new { id = quoteId });
+            }
+
+            if (!acceptedTerms)
+            {
+                TempData["ErrorMessage"] = "Debes aceptar la declaración de firma electrónica.";
+                return RedirectToAction("Details", new { id = quoteId });
+            }
+
+            var raw = $"{quoteId}|{signerName.Trim()}|{signerEmail.Trim()}|{DateTime.UtcNow:O}";
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
+
+            var signature = new QuoteSignature
+            {
+                QuoteId = quoteId,
+                SignerName = signerName.Trim(),
+                SignerEmail = signerEmail.Trim(),
+                AcceptedTerms = true,
+                SignatureHash = hash,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                SignedAt = DateTime.Now,
+            };
+
+            _context.QuoteSignatures.Add(signature);
+
+            if (await CurrentUserHasPermissionAsync("quote:approve"))
+            {
+                quote.Estado = "Aprobada";
+            }
+
+            await _context.SaveChangesAsync();
+            _auditService.Log("Quote", quote.Id.ToString(), "Sign", $"Firma electrónica registrada por {signature.SignerName}");
+
+            TempData["SuccessMessage"] = "Firma electrónica registrada correctamente.";
+            return RedirectToAction("Details", new { id = quoteId });
+        }
+
         // Acción para eliminar cotización
+        [Permission("quote:delete")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -561,6 +738,97 @@ namespace BuildertrendMVC.Controllers
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Cotización eliminada correctamente.";
             return RedirectToAction("Index");
+        }
+
+        private async Task<bool> CurrentUserHasPermissionAsync(string permission)
+        {
+            if (User.IsInRole("Admin")) return true;
+
+            var hasRoleClaim = User.Claims.Any(c => c.Type == System.Security.Claims.ClaimTypes.Role);
+            if (!hasRoleClaim)
+            {
+                // Compatibilidad con instalaciones existentes sin roles explícitos.
+                return permission != "quote:approve"
+                    && permission != "quote:delete"
+                    && permission != "quote:restore-version";
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userId)) return false;
+            return await _permissionService.UserHasPermissionAsync(userId, permission);
+        }
+
+        private static decimal TryParseSalesTax(string? salesTax)
+        {
+            if (string.IsNullOrWhiteSpace(salesTax)) return 0m;
+            var value = salesTax.Replace(',', '.');
+            return decimal.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : 0m;
+        }
+
+        private async Task CreateVersionSnapshotAsync(Quote quote, string changeSummary)
+        {
+            var nextVersion = (await _context.QuoteVersions
+                .Where(v => v.QuoteId == quote.Id)
+                .MaxAsync(v => (int?)v.VersionNumber) ?? 0) + 1;
+
+            var snapshot = new QuoteSnapshot
+            {
+                QuoteNumber = quote.QuoteNumber,
+                SalesTax = quote.SalesTax,
+                Estado = quote.Estado,
+                ClientId = quote.ClientId,
+                Items = quote.Items.Select(i => new QuoteItemSnapshot
+                {
+                    CostCode = i.CostCode,
+                    Title = i.Title,
+                    Description = i.Description,
+                    Qty = i.Qty,
+                    UnitCost = i.UnitCost,
+                    Margin = i.Margin,
+                    CustomerCost = i.CustomerCost,
+                    TotalCost = i.TotalCost,
+                    CostType = i.CostType,
+                    MarkupPercentage = i.MarkupPercentage,
+                }).ToList()
+            };
+
+            var version = new QuoteVersion
+            {
+                QuoteId = quote.Id,
+                VersionNumber = nextVersion,
+                SnapshotJson = JsonSerializer.Serialize(snapshot),
+                ChangeSummary = changeSummary,
+                CreatedBy = User.Identity?.Name ?? "Sistema",
+                CreatedAt = DateTime.Now,
+            };
+
+            _context.QuoteVersions.Add(version);
+            await _context.SaveChangesAsync();
+        }
+
+        private sealed class QuoteSnapshot
+        {
+            public string QuoteNumber { get; set; } = string.Empty;
+            public string? SalesTax { get; set; }
+            public string Estado { get; set; } = "Borrador";
+            public int? ClientId { get; set; }
+            public List<QuoteItemSnapshot> Items { get; set; } = new();
+        }
+
+        private sealed class QuoteItemSnapshot
+        {
+            public string? CostCode { get; set; }
+            public string? Title { get; set; }
+            public string? Description { get; set; }
+            public decimal Qty { get; set; }
+            public decimal UnitCost { get; set; }
+            public decimal Margin { get; set; }
+            public decimal CustomerCost { get; set; }
+            public decimal TotalCost { get; set; }
+            public string? CostType { get; set; }
+            public decimal MarkupPercentage { get; set; }
         }
     }
 }

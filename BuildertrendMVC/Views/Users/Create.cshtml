@@ -1,0 +1,165 @@
+@model BuildertrendMVC.Models.UserEditViewModel
+@{
+    ViewData["Title"] = "Crear Nuevo Usuario";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>➕ Crear Nuevo Usuario</h2>
+            <p class="text-muted">Completa el formulario para crear una nueva cuenta</p>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" class="row g-4">
+        <!-- Información del Usuario -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">📧 Información Básica</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">📧 Email</label>
+                        <input type="email" class="form-control" name="Email" asp-for="Email" placeholder="usuario@ejemplo.com" required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">🔒 Contraseña</label>
+                        <input type="password" class="form-control" name="Password" placeholder="Mínimo 6 caracteres" required />
+                        <small class="text-muted">La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">🔒 Confirmar Contraseña</label>
+                        <input type="password" class="form-control" name="ConfirmPassword" placeholder="Confirma tu contraseña" required />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asignación de Roles -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">🔐 Roles y Permisos</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AllRoles == null || Model.AllRoles.Count == 0)
+                    {
+                        <p class="text-muted">No hay roles disponibles</p>
+                    }
+                    else
+                    {
+                        <div class="role-checklist">
+                            @foreach (var role in Model.AllRoles)
+                            {
+                                <div class="form-check form-check-lg mb-3 p-3 border rounded">
+                                    <input class="form-check-input" type="checkbox" name="SelectedRoles" 
+                                           value="@role" id="role_@role" />
+                                    <label class="form-check-label flex-grow-1" for="role_@role">
+                                        <span class="fw-bold">@role</span>
+                                        <br />
+                                        <small class="text-muted">
+                                            @GetRoleDescription(role)
+                                        </small>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferencias -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">⚙️ Preferencias</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">💱 Moneda Preferida</label>
+                        <select class="form-select" name="Currency" asp-for="Currency">
+                            <option value="USD" selected="@(Model.Currency == "USD" ? "selected" : "")">USD - Dólar</option>
+                            <option value="EUR" selected="@(Model.Currency == "EUR" ? "selected" : "")">EUR - Euro</option>
+                            <option value="MXN" selected="@(Model.Currency == "MXN" ? "selected" : "")">MXN - Peso Mexicano</option>
+                            <option value="CLP" selected="@(Model.Currency == "CLP" ? "selected" : "")">CLP - Peso Chileno</option>
+                            <option value="ARS" selected="@(Model.Currency == "ARS" ? "selected" : "")">ARS - Peso Argentino</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">🌐 Idioma Preferido</label>
+                        <select class="form-select" name="Language" asp-for="Language">
+                            <option value="es" selected="@(Model.Language == "es" ? "selected" : "")">Español</option>
+                            <option value="en" selected="@(Model.Language == "en" ? "selected" : "")">Inglés</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Roles -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">📋 Roles a Asignar</h5>
+                </div>
+                <div class="card-body">
+                    <div id="selectedRolesDisplay">
+                        <span class="badge bg-secondary">Sin roles seleccionados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="col-12">
+            <hr class="my-4" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success btn-lg">
+                    ✅ Crear Usuario
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg">
+                    ❌ Cancelar
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
+    <script>
+        // Actualizar resumen de roles en tiempo real
+        document.querySelectorAll('input[name="SelectedRoles"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const selected = [];
+                document.querySelectorAll('input[name="SelectedRoles"]:checked').forEach(c => {
+                    selected.push(c.value);
+                });
+                const display = document.getElementById('selectedRolesDisplay');
+                if (selected.length === 0) {
+                    display.innerHTML = '<span class="badge bg-secondary">Sin roles seleccionados</span>';
+                } else {
+                    display.innerHTML = selected.map(r => `<span class="badge bg-primary me-2 mb-2">${r}</span>`).join('');
+                }
+            });
+        });
+    </script>
+}
+
+@functions {
+    private string GetRoleDescription(string roleName)
+    {
+        return roleName switch
+        {
+            "Admin" => "Acceso total al sistema, gestión de usuarios y configuración",
+            "Empleado" => "Acceso completo a cotizaciones y funciones operativas",
+            "Gerente" => "Supervisión de cotizaciones y reportes",
+            "Cliente" => "Acceso limitado solo a ver sus propias cotizaciones",
+            "Contador" => "Acceso a reportes financieros y auditoría",
+            _ => "Rol personalizado"
+        };
+    }
+}

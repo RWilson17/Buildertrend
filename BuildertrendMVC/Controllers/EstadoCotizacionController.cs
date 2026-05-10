@@ -3,8 +3,10 @@ using BuildertrendMVC.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Authorization;
 namespace BuildertrendMVC.Controllers
 {
+    [Authorize]
     public class EstadoCotizacionController : Controller
     {
         private readonly AppDbContext _context;

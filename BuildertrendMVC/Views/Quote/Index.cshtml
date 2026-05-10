@@ -1,40 +1,42 @@
 @model IEnumerable<BuildertrendMVC.Models.Quote>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Cotizaciones";
+    ViewData["Title"] = Localizer["QuotesTitle"];
+    bool canViewCosts = ViewBag.CanViewCosts == true;
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2 class="mb-0"><i class="bi bi-list-columns-reverse"></i> Cotizaciones</h2>
-        <button class="btn btn-success ms-2" onclick="exportTableToCSV('cotizaciones.csv', 'quoteTable')"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
+        <h2 class="mb-0"><i class="bi bi-list-columns-reverse"></i> @Localizer["QuotesTitle"]</h2>
+        <button class="btn btn-success ms-2" onclick="exportTableToCSV('quotes.csv', 'quoteTable')"><i class="bi bi-file-earmark-excel"></i> @Localizer["ExportExcel"]</button>
     </div>
-    <a class="btn btn-primary" href="/Quote/Create"><i class="bi bi-plus-circle"></i> Nueva Cotización</a>
+    <a class="btn btn-primary" href="/Quote/Create"><i class="bi bi-plus-circle"></i> @Localizer["CreateQuote"]</a>
 </div>
 <div class="row mb-3 g-2">
     <div class="col-md-3">
-        <input type="text" id="filterFolio" class="form-control" placeholder="Filtrar por folio..." />
+        <input type="text" id="filterFolio" class="form-control" placeholder="@Localizer["FilterByFolio"]" />
     </div>
     <div class="col-md-3">
-        <input type="number" id="filterMonto" class="form-control" placeholder="Monto mínimo..." step="0.01" min="0" />
+        <input type="number" id="filterMonto" class="form-control" placeholder="@Localizer["MinAmount"]" step="0.01" min="0" />
     </div>
     <div class="col-md-3">
-        <input type="text" id="filterPartidas" class="form-control" placeholder="Buscar en partidas..." />
+        <input type="text" id="filterPartidas" class="form-control" placeholder="@Localizer["SearchInItems"]" />
     </div>
     <div class="col-md-3">
-        <input type="text" id="searchQuote" class="form-control" placeholder="Búsqueda general..." />
+        <input type="text" id="searchQuote" class="form-control" placeholder="@Localizer["GeneralSearch"]" />
     </div>
 </div>
 <div class="table-responsive" style="overflow-x:auto;">
     <table class="table table-hover align-middle shadow-sm rounded" id="quoteTable" aria-label="Tabla de cotizaciones">
         <thead class="table-primary text-center" style="background-color:#0d6efd;color:#fff;">
             <tr>
-                <th style="cursor:pointer" onclick="sortTable(0, 'string')">Folio <i class="bi bi-arrow-down-up"></i></th>
-                <th>Fecha</th>
-                <th>Estado</th>
-                <th>Partidas</th>
-                <th style="cursor:pointer" onclick="sortTable(4, 'number')">Total Cotización <i class="bi bi-arrow-down-up"></i></th>
-                <th>Sales Tax</th>
-                <th>Sales Tax Amount</th>
-                <th>Acciones</th>
+                <th style="cursor:pointer" onclick="sortTable(0, 'string')">@Localizer["Folio"] <i class="bi bi-arrow-down-up"></i></th>
+                <th>@Localizer["Date"]</th>
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["Items"]</th>
+                <th style="cursor:pointer" onclick="sortTable(4, 'number')">@Localizer["Total"] <i class="bi bi-arrow-down-up"></i></th>
+                <th>@Localizer["SalesTax"]</th>
+                <th>@Localizer["SalesTaxAmount"]</th>
+                <th>@Localizer["Actions"]</th>
             </tr>
         </thead>
         <tbody id="quoteTableBody">
@@ -44,19 +46,27 @@
                     <td class="fw-bold" style="background-color:#fff;">@quote.QuoteNumber</td>
                     <td class="text-nowrap" style="background-color:#fff;">@quote.DateCreated.ToString("dd/MM/yyyy HH:mm")</td>
                     <td style="background-color:#fff;">
-                        <span class="badge bg-secondary" aria-label="Estado">@quote.Estado</span>
+                        <span class="badge bg-secondary" aria-label="@Localizer["Status"]">@quote.Estado</span>
                     </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-info text-dark" title="Cantidad de partidas">
+                            <span class="badge bg-info text-dark" title="@Localizer["ItemsCount"]">
                                 <i class="bi bi-list-ul"></i> @(quote.Items?.Count ?? 0)
                             </span>
-                            <span class="badge bg-success" title="Monto total">
-                                <i class="bi bi-cash-coin"></i> $@(quote.Items?.Sum(i => i.TotalCost).ToString("N2").Replace('.', ',') ?? "0,00")
+                            <span class="badge bg-success" title="@Localizer["TotalAmount"]">
+                                <i class="bi bi-cash-coin"></i>
+                                @if (canViewCosts)
+                                {
+                                    @GetCurrencySymbol(ViewBag.Currency)@FormatAmount(quote.Items?.Sum(i => i.TotalCost) ?? 0, ViewBag.Currency, ViewBag.Language)
+                                }
+                                else
+                                {
+                                    <span>Oculto</span>
+                                }
                             </span>
                             @if (quote.Items == null || !quote.Items.Any())
                             {
-                                <span class="badge bg-warning text-dark" title="Faltan partidas"><i class="bi bi-exclamation-triangle"></i> Sin partidas</span>
+                                <span class="badge bg-warning text-dark" title="@Localizer["NoItems"]"><i class="bi bi-exclamation-triangle"></i> @Localizer["NoItems"]</span>
                             }
                         </div>
                         @if (quote.Items != null && quote.Items.Any())
@@ -64,13 +74,26 @@
                             <ul class="mb-0 ps-3">
                                 @foreach (var item in quote.Items)
                                 {
-                                    <li><b>@item.CostCode</b>: @item.Title (@item.Qty x $@item.UnitCost.ToString("N2").Replace('.', ','))</li>
+                                    <li>
+                                        <b>@item.CostCode</b>: @item.Title
+                                        @if (canViewCosts)
+                                        {
+                                            <span>(@item.Qty x @GetCurrencySymbol(ViewBag.Currency)@FormatAmount(item.UnitCost, ViewBag.Currency, ViewBag.Language))</span>
+                                        }
+                                    </li>
                                 }
                             </ul>
                         }
                     </td>
                     <td class="text-end fw-bold">
-                        $@(quote.Items?.Sum(i => i.TotalCost).ToString("N2").Replace('.', ',') ?? "0,00")
+                        @if (canViewCosts)
+                        {
+                            @GetCurrencySymbol(ViewBag.Currency)@FormatAmount(quote.Items?.Sum(i => i.TotalCost) ?? 0, ViewBag.Currency, ViewBag.Language)
+                        }
+                        else
+                        {
+                            <span class="text-muted">Oculto</span>
+                        }
                     </td>
                     <td class="text-end">
                         @if (decimal.TryParse(quote.SalesTax?.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var stVal))
@@ -82,16 +105,53 @@
                             @quote.SalesTax
                         }
                     </td>
-                    <td class="text-end">$@quote.SalesTaxAmount.ToString("N2").Replace('.', ',')</td>
+                    <td class="text-end">
+                        @if (canViewCosts)
+                        {
+                            @GetCurrencySymbol(ViewBag.Currency)@FormatAmount(quote.SalesTaxAmount, ViewBag.Currency, ViewBag.Language)
+                        }
+                        else
+                        {
+                            <span class="text-muted">Oculto</span>
+                        }
+                    </td>
+                    @functions {
+                        public static string GetCurrencySymbol(string currency)
+                        {
+                            return currency switch
+                            {
+                                "USD" => "$",
+                                "EUR" => "€",
+                                "MXN" => "$MXN ",
+                                "CLP" => "$CLP ",
+                                "ARS" => "$ARS ",
+                                _ => "$"
+                            };
+                        }
+                        public static string FormatAmount(decimal amount, string currency, string language)
+                        {
+                            var culture = (currency, language) switch
+                            {
+                                ("USD", "en") => "en-US",
+                                ("USD", _) => "es-MX",
+                                ("EUR", _) => "es-ES",
+                                ("MXN", _) => "es-MX",
+                                ("CLP", _) => "es-CL",
+                                ("ARS", _) => "es-AR",
+                                _ => "es-MX"
+                            };
+                            return amount.ToString("N2", new System.Globalization.CultureInfo(culture));
+                        }
+                    }
                     <td class="text-center" style="background-color:#fff;">
-                        <a class="btn btn-sm btn-info me-1" href="/Quote/Details/@quote.Id" title="Ver Detalle" aria-label="Ver Detalle"><i class="bi bi-eye"></i></a>
-                        <a class="btn btn-sm btn-warning me-1" href="/Quote/Edit/@quote.Id" title="Editar" aria-label="Editar"><i class="bi bi-pencil-square"></i></a>
-                        <a class="btn btn-sm btn-secondary me-1" href="/Quote/Duplicate/@quote.Id" title="Duplicar" aria-label="Duplicar"><i class="bi bi-files"></i></a>
-                        <form method="post" action="/Quote/Delete/@quote.Id" style="display:inline" onsubmit="return confirm('¿Seguro que deseas eliminar esta cotización?');">
-                            <button type="submit" class="btn btn-sm btn-danger me-1" title="Eliminar" aria-label="Eliminar"><i class="bi bi-trash"></i></button>
+                        <a class="btn btn-sm btn-info me-1" href="/Quote/Details/@quote.Id" title="@Localizer["Details"]" aria-label="@Localizer["Details"]"><i class="bi bi-eye"></i></a>
+                        <a class="btn btn-sm btn-warning me-1" href="/Quote/Edit/@quote.Id" title="@Localizer["Edit"]" aria-label="@Localizer["Edit"]"><i class="bi bi-pencil-square"></i></a>
+                        <a class="btn btn-sm btn-secondary me-1" href="/Quote/Duplicate/@quote.Id" title="@Localizer["Duplicate"]" aria-label="@Localizer["Duplicate"]"><i class="bi bi-files"></i></a>
+                        <form method="post" action="/Quote/Delete/@quote.Id" style="display:inline" onsubmit="return confirm('@Localizer["DeleteConfirm"]');">
+                            <button type="submit" class="btn btn-sm btn-danger me-1" title="@Localizer["Delete"]" aria-label="@Localizer["Delete"]"><i class="bi bi-trash"></i></button>
                         </form>
-                        <button class="btn btn-sm btn-outline-primary me-1" title="Enviar por correo" aria-label="Enviar por correo" disabled><i class="bi bi-envelope"></i></button>
-                        <button class="btn btn-sm btn-outline-dark" title="Imprimir" aria-label="Imprimir" disabled><i class="bi bi-printer"></i></button>
+                        <button class="btn btn-sm btn-outline-primary me-1" title="@Localizer["SendByEmail"]" aria-label="@Localizer["SendByEmail"]" disabled><i class="bi bi-envelope"></i></button>
+                        <button class="btn btn-sm btn-outline-dark" title="@Localizer["Print"]" aria-label="@Localizer["Print"]" disabled><i class="bi bi-printer"></i></button>
                     </td>
                 </tr>
             }

@@ -19,6 +19,14 @@
         },
         "runtime": {
           "BuildertrendMVC.dll": {}
+        },
+        "resources": {
+          "en/BuildertrendMVC.resources.dll": {
+            "locale": "en"
+          },
+          "es/BuildertrendMVC.resources.dll": {
+            "locale": "es"
+          }
         }
       },
       "ClosedXML/0.105.0": {

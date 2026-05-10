@@ -5,12 +5,17 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
+    var currentUser = UserManager.GetUserAsync(User).Result;
     <div class="dropdown">
         <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-person-circle"></i> @User.Identity.Name
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li><a class="dropdown-item" asp-area="" asp-controller="Users" asp-action="Edit">Perfil</a></li>
+            <li class="dropdown-item-text">
+                <span class="badge bg-primary me-1">@currentUser.Currency</span>
+                <span class="badge bg-secondary">@((currentUser.Language == "es") ? "Español" : "English")</span>
+            </li>
+            <li><a class="dropdown-item" asp-area="" asp-controller="Users" asp-action="Perfil">Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
                 <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">

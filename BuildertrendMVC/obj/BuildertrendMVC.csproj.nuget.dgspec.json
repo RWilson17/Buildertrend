@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj": {}
+    "c:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj": {
+    "c:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj",
+        "projectUniqueName": "c:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj",
         "projectName": "BuildertrendMVC",
-        "projectPath": "C:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj",
+        "projectPath": "c:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\BuildertrendMVC.csproj",
         "packagesPath": "C:\\Users\\barah\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\obj\\",
+        "outputPath": "c:\\Users\\barah\\OneDrive\\Escritorio\\Buildertrend\\BuildertrendMVC\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\barah\\AppData\\Roaming\\NuGet\\NuGet.Config"

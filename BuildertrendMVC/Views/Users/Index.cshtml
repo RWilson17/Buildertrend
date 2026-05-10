@@ -1,28 +1,125 @@
 @model IEnumerable<BuildertrendMVC.Models.ApplicationUser>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Usuarios";
+    ViewData["Title"] = "Gestión de Usuarios y Roles";
 }
-<h2>Gestión de Usuarios</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Email</th>
-            <th>Roles</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.Email</td>
-                <td>
-                    @string.Join(", ", user.Roles)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-primary btn-sm">Editar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>👥 Gestión de Usuarios y Roles</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-success">
+                    ➕ Crear Usuario
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ✅ @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ❌ @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Count() == 0)
+    {
+        <div class="alert alert-info">
+            <strong>Sin usuarios registrados.</strong> Crea usuarios a través del botón "Crear Usuario".
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped border">
+                <thead class="table-dark">
+                    <tr>
+                        <th>📧 Email</th>
+                        <th>👤 Nombre de Usuario</th>
+                        <th>🏷️ Roles Asignados</th>
+                        <th>💱 Moneda</th>
+                        <th>🌐 Idioma</th>
+                        <th>⚙️ Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-dark">@user.Email</span>
+                            </td>
+                            <td>
+                                @user.UserName
+                            </td>
+                            <td>
+                                @if (user.Roles != null && user.Roles.Any())
+                                {
+                                    @foreach (var role in user.Roles)
+                                    {
+                                        <span class="badge bg-primary me-1">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Sin rol</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-info">@(user.Currency ?? "USD")</span>
+                            </td>
+                            <td>
+                                @switch(user.Language)
+                                {
+                                    case "es":
+                                        <span class="badge bg-warning">Español</span>
+                                        break;
+                                    case "en":
+                                        <span class="badge bg-success">English</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@user.Language</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-primary me-2">
+                                        ✏️ Editar
+                                    </a>
+                                    @if (User.FindFirst("sub")?.Value != user.Id)
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@user.Id" method="post" style="display:inline;" 
+                                              onsubmit="return confirm('¿Confirmas que deseas eliminar este usuario?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                🗑️ Eliminar
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Solo Admin</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
